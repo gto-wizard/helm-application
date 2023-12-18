@@ -1,0 +1,14 @@
+{{- if .Values.configmap.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ default (include "application.name" .) .Values.configmap.name }}
+  labels:
+    {{- include "application.labels" . | nindent 4 }}
+    {{- with .Values.configmap.labels }}{{- toYaml . | nindent 4 }}{{- end }}
+  annotations:
+    {{- with .Values.common.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
+    {{- with .Values.configmap.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
+data: 
+{{- toYaml .Values.configmap.data | nindent 2 }}
+{{- end }}

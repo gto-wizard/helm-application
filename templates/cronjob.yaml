@@ -1,0 +1,66 @@
+{{- if .Values.cronjob.enabled -}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "application.name" . }}{{- with .Values.cronjob.nameSuffix }}-{{- . }}{{- end }}
+  labels:
+    {{- include "application.labels" . | nindent 4 }}
+    {{- with .Values.cronjob.labels }}{{- toYaml . | nindent 4 }}{{- end }}
+  annotations:
+    {{- with .Values.common.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
+    {{- with .Values.cronjob.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
+spec:
+  schedule: {{ .Values.cronjob.schedule }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          restartPolicy: {{ .Values.cronjob.restartPolicy }}
+          serviceAccountName: {{ include "application.serviceAccountName" . }}
+          containers:
+          - name: {{ .Chart.Name }}
+            image: {{ include "application.image" . | quote }}
+            {{- with .Values.cronjob.command }}
+            command: {{- include "application.render" (dict "value" . "context" $) | nindent 12 }}
+            {{- end }}
+            {{- with .Values.cronjob.args }}
+            args: {{- include "application.render" (dict "value" . "context" $) | nindent 12 }}
+            {{- end }}
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            {{- with .Values.cronjob.resources }}
+            resources: {{- toYaml . | nindent 14 }}
+            {{- end }}
+            env:
+              {{- range $key, $value := merge .Values.cronjob.env .Values.common.env }}
+              - name: {{ $key }}
+                value: {{ $value | quote }}
+              {{- end }}
+            envFrom:
+              {{- range .Values.cronjob.extraEnvConfigMaps }}
+              - configMapRef:
+                  name: {{ . }}{{- end }}
+              {{- range .Values.common.extraEnvConfigMaps }}
+              - configMapRef:
+                  name: {{ . }}{{- end }}
+              {{- range .Values.cronjob.extraEnvSecrets }}
+              - secretRef:
+                  name: {{ . }}{{- end }}
+              {{- range .Values.common.extraEnvSecrets }}
+              - secretRef:
+                  name: {{ . }}{{- end }}
+              {{- if .Values.externalSecrets.enabled }}    
+              - secretRef:
+                  name: {{ include "application.externalSecrets.targetSecretName" . }}{{- end }}
+            securityContext:  {{- .Values.cronjob.containerSecurityContext | default .Values.common.containerSecurityContext | toYaml | nindent 14 }}
+        {{- with .Values.cronjob.sidecars }}
+        {{- include "application.render" ( dict "value" . "context" $) | nindent 8 }}
+        {{- end }}
+          nodeSelector:     {{- .Values.cronjob.nodeSelector | default .Values.common.nodeSelector | toYaml | nindent 12 }}
+          tolerations:      {{- .Values.cronjob.tolerations | default .Values.common.tolerations | toYaml | nindent 12 }}
+          affinity:         {{- .Values.cronjob.affinity | default .Values.common.affinity | toYaml | nindent 12 }}
+          securityContext:  {{- .Values.cronjob.podSecurityContext | default .Values.common.podSecurityContext | toYaml | nindent 12 }}
+{{- end }}

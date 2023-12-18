@@ -1,0 +1,723 @@
+# -- Default values for application.
+# -- This is a YAML-formatted file.
+# -- Declare variables to be passed into your templates.
+
+## @section Global parameters
+
+## @skip image
+image:
+  repository: ""
+  pullPolicy: IfNotPresent
+  tag: ""
+  shasum: ""
+  overrideTag: ""
+
+## @param imagePullSecrets[0].name List of secrets containing credentials to image registry
+imagePullSecrets:
+  - name: regcred
+
+
+## @param nameOverride String to fully override application.name template
+nameOverride: ""
+
+## @section Common parameters 
+
+## settings and values to add to all deployed objects
+
+common:
+
+  ## @param common.labels Array with labels to add to all pods
+  labels: {}
+
+  ## @param common.annotations Array with annotations to add to all pods
+  annotations: {}
+  # annotations:
+  #   common: annotation
+
+  ## @param common.topologySpreadConstraints List with constraints controlling how pods are spread across the cluster. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  topologySpreadConstraints: []
+  # topologySpreadConstraints:
+  #   - maxSkew: 1
+  #     topologyKey: topology.kubernetes.io/zone
+  #     whenUnsatisfiable: DoNotSchedule
+  #     labelSelector:
+  #       matchLabels:
+  #         app.kubernetes.io/name: app-name
+
+  ## @param common.nodeSelector Array with Node labels for all pods assignment is rendered only if deployments and jobs nodeSelector is empty. ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+  nodeSelector: {}
+
+  ## @param common.tolerations List with Tolerations for all pods assignment is rendered only if deployments and jobs tolerations is empty ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+  tolerations: []
+
+  ## @param common.affinity Array with Affinity for all pods assignment is rendered only if deployments and jobs affinity is empty. ref: https://kubernetes.io/docs/tasks/configure-pod-container/assign-pods-nodes-using-node-affinity/#schedule-a-pod-using-required-node-affinity
+  affinity: {}
+
+  ## @param common.env Array with extra environment variables to add to all pods
+  env: {}
+  # env:
+  #   key: value
+  
+  ## @param common.extraEnvConfigMaps Name of existing ConfigMap containing extra env vars for main deployment
+  extraEnvConfigMaps: []
+  # extraEnvConfigMaps:
+  #   - common-configmap-name
+
+  ## @param common.extraEnvSecrets List of names of existing Secret containing extra env vars for all pods
+  extraEnvSecrets: []
+  # extraEnvSecrets: 
+  #   - common-secret-name
+
+  ## @param common.podSecurityContext Set common pod's Security Context (Is rendered only if deployments and jobs podSecurityContext is empty) ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  podSecurityContext: {}
+  # podSecurityContext:
+  #   fsGroup: 1001
+
+  ## @param common.containerSecurityContext Configure Container Security Context (is rendered only if deployments and jobs containerSecurityContext is empty) ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  containerSecurityContext: {}
+  # containerSecurityContext:
+  #   runAsUser: 1001
+  #   allowPrivilegeEscalation: false
+  #   capabilities:
+  #     drop:
+  #     - all
+  #   readOnlyRootFilesystem: false
+  #   runAsNonRoot: true
+
+
+## @section Application parameters
+
+application:
+  ## @param application.enableDeployment Specifies whether a application deployment should be created
+  enableDeployment: true
+
+  ## @param application.labels Array with labels to add to application deployment
+  labels: {}
+
+  ## @param application.annotations Array with annotations to add to application deployment
+  annotations: {}
+  # annotations:
+  #   application: annotation
+
+  
+  ## @param application.topologySpreadConstraints  list with constraints controlling how pods are spread across the cluster. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  topologySpreadConstraints: []
+  # topologySpreadConstraints:
+  #   - maxSkew: 1
+  #     topologyKey: topology.kubernetes.io/zone
+  #     whenUnsatisfiable: DoNotSchedule
+  #     labelSelector:
+  #       matchLabels:
+  #         app.kubernetes.io/name: app-name
+  ## @param application.nodeSelector Array with Node labels for application pods assignment. ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+  nodeSelector: {}
+
+  
+  ## @param application.tolerations list with Tolerations for application pods assignment. ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+  tolerations: []
+
+  ## @param application.affinity Array with Affinity for application pods assignment. ref: https://kubernetes.io/docs/tasks/configure-pod-container/assign-pods-nodes-using-node-affinity/#schedule-a-pod-using-required-node-affinity
+  affinity: {}
+
+  job:
+
+    ## @param application.job.migrateCommand Providing enables migrating job
+    migrateCommand: ""
+
+    ## @param application.job.nameSuffix Adds name suffix to job deployment
+    nameSuffix: "migrate"
+
+    ## Object for configuration of helm hooks for migrating job (is configured only if application.migrateCommand is not empty)
+    annotations:
+       ## @skip application.job.annotations.helm.sh/hook
+      "helm.sh/hook": post-upgrade, post-install
+       ## @skip application.job.annotations.helm.sh/hook-delete-policy
+      "helm.sh/hook-delete-policy": hook-succeeded
+       ## @skip application.job.annotations.helm.sh/hook-weight
+      "helm.sh/hook-weight": "0"
+
+
+    ## @param application.job.restartPolicy Only a RestartPolicy equal to Never or OnFailure is allowed
+    restartPolicy: "Never"
+
+  ## @param application.podAnnotations Annotations for application pods. ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  podAnnotations: {}
+  # podAnnotations: 
+  #   pod: "annotations"
+  #   another: "annotation"
+  #   common: "{{ .Values.commonAnnotations.common }}"
+  
+  ## @param application.containerPort Map container ports to host ports
+  containerPort: 80
+
+  ## @param application.containerPortName Names the default container port
+  containerPortName: http
+
+  ## @skip application.extraContainerPorts
+  extraContainerPorts: []
+  # extraContainerPorts:
+  #   - name: https
+  #     containerPort: 5001
+  #     protocol: TCP
+  
+  ## @param application.replicaCount Number of application replicas to deploy
+  replicaCount: 1
+
+  ## Enable HorizontalPodAutoscaler for application pods
+  autoscaling:
+    ## @param application.autoscaling.enabled Whether enable horizontal pod autoscale
+    enabled: false
+
+    ## @param application.autoscaling.minReplicas Configure a minimum amount of pods
+    minReplicas: 1
+
+    ## @param application.autoscaling.maxReplicas Configure a maximum amount of pods
+    maxReplicas: 100
+
+    ## @param application.autoscaling.targetCPUUtilizationPercentage Define the CPU target to trigger the scaling actions (utilization percentage)
+    targetCPUUtilizationPercentage: 80
+
+    ## @param application.autoscaling.targetMemoryUtilizationPercentage Define the memory target to trigger the scaling actions (utilization percentage)
+    targetMemoryUtilizationPercentage: 80
+
+  ## @param application.revisionHistoryLimit Specifies how many old ReplicaSets for this Deployment you want to retain.
+  revisionHistoryLimit: 4
+
+  ## specifies the strategy used to replace old Pods by new ones. ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  updateStrategy:
+    ## @param application.updateStrategy.type StrategyType - Can be set to RollingUpdate or Recreate
+    type: RollingUpdate
+
+  ## @param application.initContainers Add additional init containers to the application pod(s). ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  initContainers: []
+  # initContainers:
+  #  - name: your-image-name
+  #    image: your-image
+  #    imagePullPolicy: Always
+  #    command: ['sh', '-c', 'echo "hello world"']
+
+  ## @param application.sidecars Add additional sidecar containers to the application pod(s)
+  sidecars: []
+  # sidecars:
+  #   - name: your-image-name
+  #     image: your-image
+  #     imagePullPolicy: Always
+  #     ports:
+  #       - name: portname
+  #         containerPort: 1234
+
+  ## @param application.command Override default container command (useful when using custom images)
+  command: []
+  # command:
+  #   - python
+  #   - link_shortener/core/run_migration.py
+
+  ## @param application.args Override default container args (useful when using custom images)
+  args: []
+  
+  ## @param application.env Array with extra environment variables to add to main deployment
+  env: {}
+  # env:
+  #   key: value
+  
+  ## @param application.extraEnvConfigMaps Name of existing ConfigMap containing extra env vars for main deployment
+  extraEnvConfigMaps: []
+  # extraEnvConfigMaps:
+  #   - configmap-name
+  
+  ## @param application.extraEnvSecrets Name of existing Secret containing extra env vars for main deployment
+  extraEnvSecrets: []
+  # extraEnvSecrets: 
+  #   - secret-name
+
+  ## @param application.volumes Optionally specify extra list of additional volumes for the application pod(s)
+  volumes: []
+
+  ## @param application.volumeMounts Optionally specify extra list of additional volumeMounts for the application container(s)
+  volumeMounts: []
+
+  ## @param application.startupProbe customize startupProbe on application pods. ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  startupProbe: {}
+
+  ## @param application.livenessProbe customize livenessProbe on application pods
+  livenessProbe: {}
+
+  ## @param application.readinessProbe customize readinessProbe on application pods
+  readinessProbe: {}
+
+  ## @param application.podSecurityContext Set application pod's Security Context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  podSecurityContext: {}
+  # podSecurityContext:
+  #   fsGroup: 1001
+
+  ## @param application.containerSecurityContext Set Configure Container Security Context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  containerSecurityContext: {}
+  # containerSecurityContext:
+  #   runAsUser: 1001
+  #   allowPrivilegeEscalation: false
+  #   capabilities:
+  #     drop:
+  #     - all
+  #   readOnlyRootFilesystem: false
+  #   runAsNonRoot: true
+
+  ## @skip application.resources
+  ## We usually recommend not to specify default resources and to leave this as a conscious choice for the user. This also increases chances charts run on environments with little resources, such as Minikube. If you do want to specify resources, uncomment the following lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  resources: {}
+  # resources:
+  #   limits:
+  #     cpu: 100m
+  #     memory: 128Mi
+  #   requests:
+  #     cpu: 100m
+  #     memory: 128Mi
+
+## @section Cronjob parameters
+
+cronjob:
+  ## @param cronjob.enabled Specifies whether a cronjob should be created
+  enabled: false
+
+  ## @param cronjob.nameSuffix Adds name suffix to cronjob deployment
+  nameSuffix: "cronjob"
+
+  ## @param cronjob.labels Array with labels to add to cronjob deployment
+  labels: {}
+
+  ## @param cronjob.annotations Array with annotations to add to cronjob deployment
+  annotations: {}
+  # annotations:
+  #   cronjob: annotation
+
+  ## @param cronjob.nodeSelector Array with Node labels for cronjob pods assignment. ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+  nodeSelector: {}
+
+  ## @param cronjob.tolerations list with Tolerations for cronjob pods assignment ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+  tolerations: []
+
+  ## @param cronjob.affinity Array with Affinity for cronjob pods assignment. ref: https://kubernetes.io/docs/tasks/configure-pod-container/assign-pods-nodes-using-node-affinity/#schedule-a-pod-using-required-node-affinity
+  affinity: {}
+
+  ## @skip cronjob.schedule
+        ## Frequency of running the job
+        ##   ┌───────────── minute (0 - 59)
+        ##   │ ┌───────────── hour (0 - 23)
+        ##   │ │ ┌───────────── day of the month (1 - 31)
+        ##   │ │ │ ┌───────────── month (1 - 12)
+        ##   │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday;
+        ##   │ │ │ │ │                         7 is also Sunday on some systems)
+        ##   │ │ │ │ │
+        ##   │ │ │ │ │
+        ##   * * * * *
+  schedule: "0 0 * * *"
+
+  ## @param cronjob.args Override default container args (useful when using custom images)
+  args: []
+
+  ## @param cronjob.env Array with extra environment variables to add to cronjob
+  env: {}
+  # env:
+  #   key: value
+  
+  ## @param cronjob.extraEnvConfigMaps Name of existing ConfigMap containing extra env vars for cronjob
+  extraEnvConfigMaps: []
+  # extraEnvConfigMaps:
+  #   - configmap-name
+  
+  ## @param cronjob.extraEnvSecrets Name of existing Secret containing extra env vars for cronjob
+  extraEnvSecrets: []
+  # extraEnvSecrets: 
+  #   - secret-name
+
+  ## @param cronjob.restartPolicy Only a RestartPolicy equal to Never or OnFailure is allowed
+  restartPolicy: "OnFailure"
+
+  ## @param cronjob.podSecurityContext Configure cronjob's Pods Security Context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  podSecurityContext: {}
+  # podSecurityContext:
+  #   fsGroup: 1001
+
+  ## @param cronjob.containerSecurityContext Configure Configure Container Security Context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  containerSecurityContext: {}
+  # containerSecurityContext:
+  #   runAsUser: 1001
+  #   allowPrivilegeEscalation: false
+  #   capabilities:
+  #     drop:
+  #     - all
+  #   readOnlyRootFilesystem: false
+  #   runAsNonRoot: true
+  
+  ## @param cronjob.resources We usually recommend not to specify default resources and to leave this as a conscious choice for the user. This also increases chances charts run on environments with little resources, such as Minikube. If you do want to specify resources, uncomment the following lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  resources: {}
+  # resources:
+  #   limits:
+  #     cpu: 100m
+  #     memory: 128Mi
+  #   requests:
+  #     cpu: 100m
+  #     memory: 128Mi
+
+  ## @param cronjob.command Override default container command (useful when using custom images)
+  command: []
+
+## @section Worker parameters
+
+worker:
+  ## @param worker.enabled Specifies whether a worker should be created
+  enabled: false
+
+  ## @param worker.nameSuffix Adds name suffix to worker deployment
+  nameSuffix: "worker"
+
+  ## @param worker.imageDiff boolean specifying whether worker deployment will have a different image
+  imageDiff: false
+
+  ## Array for worker deployment image
+  image:
+    ## @skip worker.image.repository
+    repository: ""
+    ## @skip worker.image.tag
+    tag: ""
+    ## @skip worker.image.shasum
+    shasum: ""
+    ## @skip worker.image.overrideTag
+    overrideTag: ""
+
+  ## @param worker.labels Array with labels to add to worker deployment
+  labels: {}
+
+  ## @param worker.annotations Array with annotations to add to worker deployment
+  annotations: {}
+  # annotations:
+  #   worker: annotation
+
+  ## @param worker.topologySpreadConstraints List with constraints controlling how pods are spread across the cluster. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  topologySpreadConstraints: []
+  # topologySpreadConstraints:
+  #   - maxSkew: 1
+  #     topologyKey: topology.kubernetes.io/zone
+  #     whenUnsatisfiable: DoNotSchedule
+  #     labelSelector:
+  #       matchLabels:
+  #         app.kubernetes.io/name: app-name
+
+  ## @param worker.nodeSelector Array with Node labels for worker pods assignment
+  nodeSelector: {}
+
+  ## @param worker.tolerations list with Tolerations for worker pods assignment
+  tolerations: []
+
+  ## @param worker.affinity Array with Affinity for worker pods assignment
+  affinity: {}
+
+  ## @param worker.podAnnotations Annotations for worker pods. ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  podAnnotations: {}
+  # podAnnotations: 
+  #   pod: "annotations"
+  #   another: "annotation"
+  #   common: "{{ .Values.commonAnnotations.common }}"
+  
+  ## @param worker.replicaCount Number of worker replicas to deploy
+  replicaCount: 1
+
+  ## Enable HorizontalPodAutoscaler for worker pods
+  autoscaling:
+    ## @param worker.autoscaling.enabled  Whether enable horizontal pod autoscale
+    enabled: false
+
+    ## @param worker.autoscaling.minReplicas Configure a minimum amount of pods
+    minReplicas: 1
+
+    ## @param worker.autoscaling.maxReplicas Configure a maximum amount of pods
+    maxReplicas: 100
+
+    ## @param worker.autoscaling.targetCPUUtilizationPercentage Define the CPU target to trigger the scaling actions (utilization percentage)
+    targetCPUUtilizationPercentage: 80
+
+    ## @param worker.autoscaling.targetMemoryUtilizationPercentage Define the memory target to trigger the scaling actions (utilization percentage)
+    targetMemoryUtilizationPercentage: 80
+
+  ## @param worker.revisionHistoryLimit specifies how many old ReplicaSets for this Deployment you want to retain.
+  revisionHistoryLimit: 4
+
+  ## specifies the strategy used to replace old Pods by new ones. ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  updateStrategy:
+    ## @param worker.updateStrategy.type StrategyType - Can be set to RollingUpdate or Recreate
+    type: RollingUpdate
+
+  ## @param worker.initContainers Add additional init containers to the worker pod(s). ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  initContainers: []
+  # initContainers:
+  #  - name: your-image-name
+  #    image: your-image
+  #    imagePullPolicy: Always
+  #    command: ['sh', '-c', 'echo "hello world"']
+
+  ## @param worker.sidecars Add additional sidecar containers to the worker pod(s)
+  sidecars: []
+  # sidecars:
+  #   - name: your-image-name
+  #     image: your-image
+  #     imagePullPolicy: Always
+  #     ports:
+  #       - name: portname
+  #         containerPort: 1234
+
+  ## @param worker.command Override default container command (useful when using custom images)
+  command: []
+
+  ## @param worker.args Override default container args (useful when using custom images)
+  args: []
+
+  ## @param worker.env Array with extra environment variables to add to worker deployment
+  env: {}
+  # env:
+  #   key: value
+  
+  ## @param worker.extraEnvConfigMaps Name of existing ConfigMap containing extra env vars for worker deployment
+  extraEnvConfigMaps: []
+  # extraEnvConfigMaps:
+  #   - configmap-name
+  
+  ## @param worker.extraEnvSecrets Name of existing Secret containing extra env vars for worker deployment
+  extraEnvSecrets: []
+  # extraEnvSecrets: 
+  #   - secret-name
+
+  ## @param worker.volumes Optionally specify extra list of additional volumes for the worker pod(s)
+  volumes: []
+
+  ## @param worker.volumeMounts Optionally specify extra list of additional volumeMounts for the worker container(s)
+  volumeMounts: []
+
+  ## @param worker.startupProbe customize startupProbe on worker pod Configure extra options for worker containers' liveness and readiness probes. ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  startupProbe: {}
+
+  ## @param worker.livenessProbe customize livenessProbe on worker pods
+  livenessProbe: {}
+
+  ## @param worker.readinessProbe customize readinessProbe on worker pods
+  readinessProbe: {}
+
+  ## @param worker.podSecurityContext Configure worker's Pods Security Context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  podSecurityContext: {}
+  # podSecurityContext:
+  #   fsGroup: 1001
+
+  ## @param worker.containerSecurityContext Configure worker Container Security Context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  containerSecurityContext: {}
+  # containerSecurityContext:
+  #   runAsUser: 1001
+  #   allowPrivilegeEscalation: false
+  #   capabilities:
+  #     drop:
+  #     - all
+  #   readOnlyRootFilesystem: false
+  #   runAsNonRoot: true
+
+  ## @skip worker.resources
+  ## We usually recommend not to specify default resources and to leave this as a conscious choice for the user. This also increases chances charts run on environments with little resources, such as Minikube. If you do want to specify resources, uncomment the following lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  resources: {}
+  # resources:
+  #   limits:
+  #     cpu: 100m
+  #     memory: 128Mi
+  #   requests:
+  #     cpu: 100m
+  #     memory: 128Mi
+
+## @section External Secrets parameters
+## secrets need to be also specified in `secretEnv` to be available for containers
+externalSecrets:
+## @param externalSecrets.enabled Specifies whether a automatic external secrets should be integrated
+  enabled: false
+
+  ## @param externalSecrets.labels Array with labels to add to externalSecrets
+  labels: {}
+
+  ## @param externalSecrets.annotations Array with annotations to add to externalSecrets
+  annotations: {}
+  # annotations:
+  #   externalSecrets: annotation
+
+  ## @param externalSecrets.secretStoreKind String with kind of the SecretStore resource (SecretStore or ClusterSecretStore) Defaults to SecretStore
+  secretStoreKind:  "SecretStore"
+  
+  ## @param externalSecrets.secretStoreName SecretStore is created by Terraform with the name `$APP_NAME-$APP_ENVIRONMENT`
+  secretStoreName:  ## Empty will match SecretStore on the cluster
+
+  ## @param externalSecrets.targetSecretName String with name for the target secret
+  targetSecretName: ""
+
+  ## @param externalSecrets.creationPolicy String with definition of how the operator creates the a secret
+  creationPolicy: Owner
+
+  ## @param externalSecrets.variables list of variable names from GitLab to expose to the container
+  variables: []
+  
+  ## @param externalSecrets.extract list of variable names containing JSON objects that will be expanded to environment variables - each key inside the JSON object will correspond to a single environment variable
+  extract: []
+
+  ## @param externalSecrets.findRegex string used to find secrets based on regular expressions and rewrite the key names.
+  findRegex: ""
+  
+  ## @param externalSecrets.extraDataFrom List of objects used to fetch all properties from the Provider key
+  extraDataFrom: []
+  # extraDataFrom:
+  #   - extract:
+  #       key: database-credentials
+  #       version: v1
+  #       property: data
+  #       conversionStrategy: Default
+  #       decodingStrategy: Auto
+  #     rewrite:
+  #     - regexp:
+  #         source: "exp-(.*?)-ression"
+  #         target: "rewriting-${1}-with-groups"
+
+## @section Service Account parameters
+
+serviceAccount:
+  ## @param serviceAccount.create Specifies whether a service account should be created
+  create: false
+
+  ## @param serviceAccount.name The name of the service account to use. If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+  ## @param serviceAccount.labels Array with labels to add to serviceAccount
+  labels: {}
+
+  ## @param serviceAccount.annotations Array with annotations to add to serviceAccount
+  annotations: {}
+  # annotations:
+  #   serviceAccount: annotation
+
+## @section Configmap parameters
+
+configmap:
+  ## @param configmap.enabled Specifies whether a configmap should be created
+  enabled: false
+
+  ## @param configmap.name  String with custom name of the configmap
+  name: ""
+
+  ## @param configmap.labels  Array with labels to add to configmap
+  labels: {}
+
+  ## @param configmap.annotations  Array with annotations to add to configmap
+  annotations: {}
+  # annotations:
+  #   configmap: annotation
+
+  ## @skip configmap.data
+  data: {}
+
+## @section Service parameters
+
+service:
+  ## @param service.enabled Specifies whether a service should be created
+  enabled: true
+
+  ## @param service.labels  Array with labels to add to service
+  labels: {}
+
+  ## @param service.annotations  Array with annotations to add to service
+  annotations: {}
+  # annotations:
+  #   service: annotation
+
+  ## @param service.type String which allows you to specify what kind of Service you want
+  type: ClusterIP
+  
+  ## @param service.port Intiger with incoming port
+  port: 80
+
+  ## @param service.name String with name of the port
+  name : http
+
+  ## @param service.targetPortName String with name of the port to target
+  targetPortName: http
+
+  ## @skip service.extraContainerPorts
+  extraPorts: []
+  # extraPorts:
+  #   - name: https
+  #     port: 5001
+  #     targetPort: 5001
+
+## @section Ingress parameters
+
+ingress:
+  ## @param ingress.enabled Specifies whether a ingress should be created
+  enabled: false
+  ## @skip ingress.className
+  className: ""
+  ## @param ingress.labels  Array with labels to add to ingresss
+  labels: {}
+
+  ## @param ingress.annotations  Array with annotations to add to ingresss
+  annotations: {}
+  # annotations:
+  #   kubernetes.io/ingress.class: nginx
+  #   kubernetes.io/tls-acme: "true"
+  ## @skip ingress.hosts
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  ## @skip ingress.tls
+  tls: []
+  # tls:
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+
+# -- Extra objects to deploy (value evaluated as a template)
+# -- In some cases, it can avoid the need for additional, extended or adhoc deployments.
+# -- See #595 for more details and traefik/tests/extra.yaml for example.
+# -- https://github.com/traefik/traefik-helm-chart/pull/643/files
+# -- Extra objects to deploy (value evaluated as a template)
+## @skip extraObjects
+extraObjects: []
+# extraObjects:
+#   - apiVersion: v1
+#     kind: ConfigMap
+#     metadata:
+#       name: "extra"
+#     data:
+#       something: "extra"
+#   - |
+#     apiVersion: v1
+#     kind: ConfigMap
+#     metadata:
+#       name: "templated"
+#     data:
+#       something: {{ printf "templated" }}
+
+## @section Service Monitor parameters
+
+serviceMonitor:
+  ## @param serviceMonitor.enabled Specifies whether a service monitor should be created
+  enabled: false
+
+  ## @param serviceMonitor.labels Array with labels to add to serviceMonitor
+  labels: {}
+
+  ## @param serviceMonitor.interval How often should the metrics be scraped
+  interval: 30s
+
+  ## @param serviceMonitor.path HTTP path to scrape for metrics.
+  path: /metrics
+
+  ## @param serviceMonitor.scheme HTTP scheme to use for scraping.
+  scheme: ""
+
+  ## @param serviceMonitor.tlsConfig TLS configuration to use when scraping the endpoint
+  tlsConfig: {}
+
+  ## @param serviceMonitor.scrapeTimeout Timeout after which the scrape is ended
+  scrapeTimeout: ""
+

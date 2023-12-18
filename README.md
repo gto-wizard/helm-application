@@ -1,93 +1,189 @@
-# Application
+# application
 
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
+## Parameters
 
-## Getting started
+### Global parameters
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+| Name                       | Description                                              | Value     |
+| -------------------------- | -------------------------------------------------------- | --------- |
+| `imagePullSecrets[0].name` | List of secrets containing credentials to image registry | `regcred` |
+| `nameOverride`             | String to fully override application.name template       | `""`      |
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+### Common parameters 
 
-## Add your files
+| Name                               | Description                                                                                                                                                                                                                                              | Value |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| `common.labels`                    | Array with labels to add to all pods                                                                                                                                                                                                                     | `{}`  |
+| `common.annotations`               | Array with annotations to add to all pods                                                                                                                                                                                                                | `{}`  |
+| `common.topologySpreadConstraints` | List with constraints controlling how pods are spread across the cluster. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/                                                                                      | `[]`  |
+| `common.nodeSelector`              | Array with Node labels for all pods assignment is rendered only if deployments and jobs nodeSelector is empty. ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector                                                | `{}`  |
+| `common.tolerations`               | List with Tolerations for all pods assignment is rendered only if deployments and jobs tolerations is empty ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/                                                           | `[]`  |
+| `common.affinity`                  | Array with Affinity for all pods assignment is rendered only if deployments and jobs affinity is empty. ref: https://kubernetes.io/docs/tasks/configure-pod-container/assign-pods-nodes-using-node-affinity/#schedule-a-pod-using-required-node-affinity | `{}`  |
+| `common.env`                       | Array with extra environment variables to add to all pods                                                                                                                                                                                                | `{}`  |
+| `common.extraEnvConfigMaps`        | Name of existing ConfigMap containing extra env vars for main deployment                                                                                                                                                                                 | `[]`  |
+| `common.extraEnvSecrets`           | List of names of existing Secret containing extra env vars for all pods                                                                                                                                                                                  | `[]`  |
+| `common.podSecurityContext`        | Set common pod's Security Context (Is rendered only if deployments and jobs podSecurityContext is empty) ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod                              | `{}`  |
+| `common.containerSecurityContext`  | Configure Container Security Context (is rendered only if deployments and jobs containerSecurityContext is empty) ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container               | `{}`  |
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+### Application parameters
 
-```
-cd existing_repo
-git remote add origin https://gitlab.com/gto-wizard/devops/helm-charts/application.git
-git branch -M main
-git push -uf origin main
-```
+| Name                                                        | Description                                                                                                                                                                                           | Value           |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `application.enableDeployment`                              | Specifies whether a application deployment should be created                                                                                                                                          | `true`          |
+| `application.labels`                                        | Array with labels to add to application deployment                                                                                                                                                    | `{}`            |
+| `application.annotations`                                   | Array with annotations to add to application deployment                                                                                                                                               | `{}`            |
+| `application.topologySpreadConstraints`                     | list with constraints controlling how pods are spread across the cluster. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/                                   | `[]`            |
+| `application.nodeSelector`                                  | Array with Node labels for application pods assignment. ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector                                                    | `{}`            |
+| `application.tolerations`                                   | list with Tolerations for application pods assignment. ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/                                                             | `[]`            |
+| `application.affinity`                                      | Array with Affinity for application pods assignment. ref: https://kubernetes.io/docs/tasks/configure-pod-container/assign-pods-nodes-using-node-affinity/#schedule-a-pod-using-required-node-affinity | `{}`            |
+| `application.job.migrateCommand`                            | Providing enables migrating job                                                                                                                                                                       | `""`            |
+| `application.job.nameSuffix`                                | Adds name suffix to job deployment                                                                                                                                                                    | `migrate`       |
+| `application.job.restartPolicy`                             | Only a RestartPolicy equal to Never or OnFailure is allowed                                                                                                                                           | `Never`         |
+| `application.podAnnotations`                                | Annotations for application pods. ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/                                                                                 | `{}`            |
+| `application.containerPort`                                 | Map container ports to host ports                                                                                                                                                                     | `80`            |
+| `application.replicaCount`                                  | Number of application replicas to deploy                                                                                                                                                              | `1`             |
+| `application.autoscaling.enabled`                           | Whether enable horizontal pod autoscale                                                                                                                                                               | `false`         |
+| `application.autoscaling.minReplicas`                       | Configure a minimum amount of pods                                                                                                                                                                    | `1`             |
+| `application.autoscaling.maxReplicas`                       | Configure a maximum amount of pods                                                                                                                                                                    | `100`           |
+| `application.autoscaling.targetCPUUtilizationPercentage`    | Define the CPU target to trigger the scaling actions (utilization percentage)                                                                                                                         | `80`            |
+| `application.autoscaling.targetMemoryUtilizationPercentage` | Define the memory target to trigger the scaling actions (utilization percentage)                                                                                                                      | `80`            |
+| `application.revisionHistoryLimit`                          | Specifies how many old ReplicaSets for this Deployment you want to retain.                                                                                                                            | `4`             |
+| `application.updateStrategy.type`                           | StrategyType - Can be set to RollingUpdate or Recreate                                                                                                                                                | `RollingUpdate` |
+| `application.initContainers`                                | Add additional init containers to the application pod(s). ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/                                                                    | `[]`            |
+| `application.sidecars`                                      | Add additional sidecar containers to the application pod(s)                                                                                                                                           | `[]`            |
+| `application.command`                                       | Override default container command (useful when using custom images)                                                                                                                                  | `[]`            |
+| `application.args`                                          | Override default container args (useful when using custom images)                                                                                                                                     | `[]`            |
+| `application.env`                                           | Array with extra environment variables to add to main deployment                                                                                                                                      | `{}`            |
+| `application.extraEnvConfigMaps`                            | Name of existing ConfigMap containing extra env vars for main deployment                                                                                                                              | `[]`            |
+| `application.extraEnvSecrets`                               | Name of existing Secret containing extra env vars for main deployment                                                                                                                                 | `[]`            |
+| `application.volumes`                                       | Optionally specify extra list of additional volumes for the application pod(s)                                                                                                                        | `[]`            |
+| `application.volumeMounts`                                  | Optionally specify extra list of additional volumeMounts for the application container(s)                                                                                                             | `[]`            |
+| `application.startupProbe`                                  | customize startupProbe on application pods. ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes                                       | `{}`            |
+| `application.livenessProbe`                                 | customize livenessProbe on application pods                                                                                                                                                           | `{}`            |
+| `application.readinessProbe`                                | customize readinessProbe on application pods                                                                                                                                                          | `{}`            |
+| `application.podSecurityContext`                            | Set application pod's Security Context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod                                            | `{}`            |
+| `application.containerSecurityContext`                      | Set Configure Container Security Context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container                                    | `{}`            |
 
-## Integrate with your tools
+### Cronjob parameters
 
-- [ ] [Set up project integrations](https://gitlab.com/gto-wizard/devops/helm-charts/application/-/settings/integrations)
+| Name                               | Description                                                                                                                                                                                                                                                                                                                                               | Value       |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `cronjob.enabled`                  | Specifies whether a cronjob should be created                                                                                                                                                                                                                                                                                                             | `false`     |
+| `cronjob.nameSuffix`               | Adds name suffix to cronjob deployment                                                                                                                                                                                                                                                                                                                    | `cronjob`   |
+| `cronjob.labels`                   | Array with labels to add to cronjob deployment                                                                                                                                                                                                                                                                                                            | `{}`        |
+| `cronjob.annotations`              | Array with annotations to add to cronjob deployment                                                                                                                                                                                                                                                                                                       | `{}`        |
+| `cronjob.nodeSelector`             | Array with Node labels for cronjob pods assignment. ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector                                                                                                                                                                                                            | `{}`        |
+| `cronjob.tolerations`              | list with Tolerations for cronjob pods assignment ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/                                                                                                                                                                                                                      | `[]`        |
+| `cronjob.affinity`                 | Array with Affinity for cronjob pods assignment. ref: https://kubernetes.io/docs/tasks/configure-pod-container/assign-pods-nodes-using-node-affinity/#schedule-a-pod-using-required-node-affinity                                                                                                                                                         | `{}`        |
+| `cronjob.args`                     | Override default container args (useful when using custom images)                                                                                                                                                                                                                                                                                         | `[]`        |
+| `cronjob.env`                      | Array with extra environment variables to add to cronjob                                                                                                                                                                                                                                                                                                  | `{}`        |
+| `cronjob.extraEnvConfigMaps`       | Name of existing ConfigMap containing extra env vars for cronjob                                                                                                                                                                                                                                                                                          | `[]`        |
+| `cronjob.extraEnvSecrets`          | Name of existing Secret containing extra env vars for cronjob                                                                                                                                                                                                                                                                                             | `[]`        |
+| `cronjob.restartPolicy`            | Only a RestartPolicy equal to Never or OnFailure is allowed                                                                                                                                                                                                                                                                                               | `OnFailure` |
+| `cronjob.podSecurityContext`       | Configure cronjob's Pods Security Context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod                                                                                                                                                                                             | `{}`        |
+| `cronjob.containerSecurityContext` | Configure Configure Container Security Context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container                                                                                                                                                                                  | `{}`        |
+| `cronjob.resources`                | We usually recommend not to specify default resources and to leave this as a conscious choice for the user. This also increases chances charts run on environments with little resources, such as Minikube. If you do want to specify resources, uncomment the following lines, adjust them as necessary, and remove the curly braces after 'resources:'. | `{}`        |
+| `cronjob.command`                  | Override default container command (useful when using custom images)                                                                                                                                                                                                                                                                                      | `[]`        |
 
-## Collaborate with your team
+### Worker parameters
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+| Name                                                   | Description                                                                                                                                                                                                                            | Value           |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `worker.enabled`                                       | Specifies whether a worker should be created                                                                                                                                                                                           | `false`         |
+| `worker.nameSuffix`                                    | Adds name suffix to worker deployment                                                                                                                                                                                                  | `worker`        |
+| `worker.imageDiff`                                     | boolean specifying whether worker deployment will have a different image                                                                                                                                                               | `false`         |
+| `worker.labels`                                        | Array with labels to add to worker deployment                                                                                                                                                                                          | `{}`            |
+| `worker.annotations`                                   | Array with annotations to add to worker deployment                                                                                                                                                                                     | `{}`            |
+| `worker.topologySpreadConstraints`                     | List with constraints controlling how pods are spread across the cluster. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/                                                                    | `[]`            |
+| `worker.nodeSelector`                                  | Array with Node labels for worker pods assignment                                                                                                                                                                                      | `{}`            |
+| `worker.tolerations`                                   | list with Tolerations for worker pods assignment                                                                                                                                                                                       | `[]`            |
+| `worker.affinity`                                      | Array with Affinity for worker pods assignment                                                                                                                                                                                         | `{}`            |
+| `worker.podAnnotations`                                | Annotations for worker pods. ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/                                                                                                                       | `{}`            |
+| `worker.replicaCount`                                  | Number of worker replicas to deploy                                                                                                                                                                                                    | `1`             |
+| `worker.autoscaling.enabled`                           | Whether enable horizontal pod autoscale                                                                                                                                                                                                | `false`         |
+| `worker.autoscaling.minReplicas`                       | Configure a minimum amount of pods                                                                                                                                                                                                     | `1`             |
+| `worker.autoscaling.maxReplicas`                       | Configure a maximum amount of pods                                                                                                                                                                                                     | `100`           |
+| `worker.autoscaling.targetCPUUtilizationPercentage`    | Define the CPU target to trigger the scaling actions (utilization percentage)                                                                                                                                                          | `80`            |
+| `worker.autoscaling.targetMemoryUtilizationPercentage` | Define the memory target to trigger the scaling actions (utilization percentage)                                                                                                                                                       | `80`            |
+| `worker.revisionHistoryLimit`                          | specifies how many old ReplicaSets for this Deployment you want to retain.                                                                                                                                                             | `4`             |
+| `worker.updateStrategy.type`                           | StrategyType - Can be set to RollingUpdate or Recreate                                                                                                                                                                                 | `RollingUpdate` |
+| `worker.initContainers`                                | Add additional init containers to the worker pod(s). ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/                                                                                                          | `[]`            |
+| `worker.sidecars`                                      | Add additional sidecar containers to the worker pod(s)                                                                                                                                                                                 | `[]`            |
+| `worker.command`                                       | Override default container command (useful when using custom images)                                                                                                                                                                   | `[]`            |
+| `worker.args`                                          | Override default container args (useful when using custom images)                                                                                                                                                                      | `[]`            |
+| `worker.env`                                           | Array with extra environment variables to add to worker deployment                                                                                                                                                                     | `{}`            |
+| `worker.extraEnvConfigMaps`                            | Name of existing ConfigMap containing extra env vars for worker deployment                                                                                                                                                             | `[]`            |
+| `worker.extraEnvSecrets`                               | Name of existing Secret containing extra env vars for worker deployment                                                                                                                                                                | `[]`            |
+| `worker.volumes`                                       | Optionally specify extra list of additional volumes for the worker pod(s)                                                                                                                                                              | `[]`            |
+| `worker.volumeMounts`                                  | Optionally specify extra list of additional volumeMounts for the worker container(s)                                                                                                                                                   | `[]`            |
+| `worker.startupProbe`                                  | customize startupProbe on worker pod Configure extra options for worker containers' liveness and readiness probes. ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes | `{}`            |
+| `worker.livenessProbe`                                 | customize livenessProbe on worker pods                                                                                                                                                                                                 | `{}`            |
+| `worker.readinessProbe`                                | customize readinessProbe on worker pods                                                                                                                                                                                                | `{}`            |
+| `worker.podSecurityContext`                            | Configure worker's Pods Security Context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod                                                                           | `{}`            |
+| `worker.containerSecurityContext`                      | Configure worker Container Security Context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container                                                                  | `{}`            |
 
-## Test and Deploy
+### External Secrets parameters
 
-Use the built-in continuous integration in GitLab.
+| Name                               | Description                                                                                                                                                                      | Value   |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `externalSecrets.enabled`          | Specifies whether a automatic external secrets should be integrated                                                                                                              | `false` |
+| `externalSecrets.labels`           | Array with labels to add to externalSecrets                                                                                                                                      | `{}`    |
+| `externalSecrets.annotations`      | Array with annotations to add to externalSecrets                                                                                                                                 | `{}`    |
+| `externalSecrets.secretStoreName`  | SecretStore is created by Terraform with the name `$APP_NAME-$APP_ENVIRONMENT`                                                                                                   | `nil`   |
+| `externalSecrets.targetSecretName` | String with name for the target secret                                                                                                                                           | `""`    |
+| `externalSecrets.creationPolicy`   | String with definition of how the operator creates the a secret                                                                                                                  | `Owner` |
+| `externalSecrets.variables`        | list of variable names from GitLab to expose to the container                                                                                                                    | `[]`    |
+| `externalSecrets.extract`          | list of variable names containing JSON objects that will be expanded to environment variables - each key inside the JSON object will correspond to a single environment variable | `[]`    |
+| `externalSecrets.findRegex`        | string used to find secrets based on regular expressions and rewrite the key names.                                                                                              | `""`    |
+| `externalSecrets.extraDataFrom`    | List of objects used to fetch all properties from the Provider key                                                                                                               | `[]`    |
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+### Service Account parameters
 
-***
+| Name                         | Description                                                                                                            | Value   |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------- |
+| `serviceAccount.create`      | Specifies whether a service account should be created                                                                  | `false` |
+| `serviceAccount.name`        | The name of the service account to use. If not set and create is true, a name is generated using the fullname template | `""`    |
+| `serviceAccount.labels`      | Array with labels to add to serviceAccount                                                                             | `{}`    |
+| `serviceAccount.annotations` | Array with annotations to add to serviceAccount                                                                        | `{}`    |
 
-# Editing this README
+### Configmap parameters
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+| Name                    | Description                                     | Value   |
+| ----------------------- | ----------------------------------------------- | ------- |
+| `configmap.enabled`     | Specifies whether a configmap should be created | `false` |
+| `configmap.name`        | String with custom name of the configmap        | `""`    |
+| `configmap.labels`      | Array with labels to add to configmap           | `{}`    |
+| `configmap.annotations` | Array with annotations to add to configmap      | `{}`    |
 
-## Suggestions for a good README
+### Service parameters
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+| Name                  | Description                                                      | Value       |
+| --------------------- | ---------------------------------------------------------------- | ----------- |
+| `service.enabled`     | Specifies whether a service should be created                    | `true`      |
+| `service.labels`      | Array with labels to add to service                              | `{}`        |
+| `service.annotations` | Array with annotations to add to service                         | `{}`        |
+| `service.type`        | String which allows you to specify what kind of Service you want | `ClusterIP` |
+| `service.port`        | Intiger with incoming port                                       | `80`        |
+| `service.name`        | String with name of the port                                     | `http`      |
 
-## Name
-Choose a self-explaining name for your project.
+### Ingress parameters
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+| Name                  | Description                                   | Value   |
+| --------------------- | --------------------------------------------- | ------- |
+| `ingress.enabled`     | Specifies whether a ingress should be created | `false` |
+| `ingress.labels`      | Array with labels to add to ingresss          | `{}`    |
+| `ingress.annotations` | Array with annotations to add to ingresss     | `{}`    |
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+### Service Monitor parameters
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+| Name                           | Description                                           | Value      |
+| ------------------------------ | ----------------------------------------------------- | ---------- |
+| `serviceMonitor.enabled`       | Specifies whether a service monitor should be created | `false`    |
+| `serviceMonitor.labels`        | Array with labels to add to serviceMonitor            | `{}`       |
+| `serviceMonitor.interval`      | How often should the metrics be scraped               | `30s`      |
+| `serviceMonitor.path`          | HTTP path to scrape for metrics.                      | `/metrics` |
+| `serviceMonitor.scheme`        | HTTP scheme to use for scraping.                      | `""`       |
+| `serviceMonitor.tlsConfig`     | TLS configuration to use when scraping the endpoint   | `{}`       |
+| `serviceMonitor.scrapeTimeout` | Timeout after which the scrape is ended               | `""`       |

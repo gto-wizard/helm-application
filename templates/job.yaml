@@ -1,0 +1,55 @@
+{{- if .Values.application.job.migrateCommand -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "application.name" . }}{{- with .Values.application.job.nameSuffix }}-{{- . }}{{- end }}
+  labels:
+    {{- include "application.labels" . | nindent 4 }}
+    {{- with .Values.application.labels }}{{- toYaml . | nindent 4 }}{{- end }}
+  annotations:
+    {{- with .Values.common.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
+    {{- with .Values.application.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
+    {{- with .Values.application.job.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "application.selectorLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: {{ .Values.application.job.restartPolicy }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: {{ include "application.image" . | quote }}
+        args: ["{{ .Values.application.job.migrateCommand }}"]
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+          {{- range $key, $value := merge .Values.application.env .Values.common.env }}
+          - name: {{ $key }}
+            value: {{ $value | quote }}
+          {{- end }}
+        envFrom:
+          {{- range .Values.application.extraEnvConfigMaps }}
+          - configMapRef:
+              name: {{ . }}{{- end }}
+          {{- range .Values.common.extraEnvConfigMaps }}
+          - configMapRef:
+              name: {{ . }}{{- end }}
+          {{- range .Values.application.extraEnvSecrets }}
+          - secretRef:
+              name: {{ . }}{{- end }}
+          {{- range .Values.common.extraEnvSecrets }}
+          - secretRef:
+              name: {{ . }}{{- end }}
+          {{- if .Values.externalSecrets.enabled }}    
+          - secretRef:
+              name: {{ include "application.externalSecrets.targetSecretName" . }}{{- end }}
+        securityContext: {{- .Values.application.containerSecurityContext | default .Values.common.containerSecurityContext | toYaml | nindent 10 }}
+      nodeSelector:      {{- .Values.application.nodeSelector | default .Values.common.nodeSelector | toYaml | nindent 8 }}      
+      tolerations:      {{- .Values.application.tolerations | default .Values.common.tolerations | toYaml | nindent 8 }}
+      affinity:         {{- .Values.application.affinity | default .Values.common.affinity | toYaml | nindent 8 }}       
+      securityContext:  {{- .Values.application.podSecurityContext | default .Values.common.podSecurityContext | toYaml | nindent 8 }}
+{{- end -}}

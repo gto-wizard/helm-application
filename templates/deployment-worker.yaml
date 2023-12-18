@@ -1,0 +1,79 @@
+{{- if .Values.worker.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "application.name" . }}{{- with .Values.worker.nameSuffix }}-{{- . }}{{- end }}
+  labels:
+    {{- include "application.labels" . | nindent 4 }}
+    {{- with .Values.worker.labels }}{{- toYaml . | nindent 4 }}{{- end }}
+  annotations:
+    {{- with .Values.common.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
+    {{- with .Values.worker.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
+spec:
+  {{- if not .Values.worker.autoscaling.enabled }}
+  replicas: {{ .Values.worker.replicaCount }}
+  {{- end }}
+  revisionHistoryLimit: {{ with .Values.worker.revisionHistoryLimit }}{{ . }}{{- end }}
+  strategy: {{- toYaml .Values.worker.updateStrategy | nindent 4 }}
+  selector:
+    matchLabels:
+      {{- include "application.selectorLabels.worker" . | nindent 6 }}
+  template:
+    metadata:
+      annotations: {{- toYaml .Values.worker.podAnnotations | nindent 8 }}
+      labels:
+        {{- include "application.selectorLabels.worker" . | nindent 8 }}
+    spec:
+      imagePullSecrets: {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      serviceAccountName: {{ include "application.serviceAccountName" . }}
+      initContainers:
+        {{- with .Values.worker.initContainers }}
+          {{- include "application.render" (dict "value" . "context" $) | nindent 8 }}
+        {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ include "application.worker.image" . | quote }}        
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: {{- toYaml .Values.worker.command | nindent 12 }}
+          args: {{- toYaml .Values.worker.args | nindent 12 }}
+          resources: {{- .Values.worker.resources | toYaml | nindent 12 }}
+          env:
+            {{- range $key, $value := merge .Values.worker.env .Values.common.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          envFrom:
+            {{- range .Values.worker.extraEnvConfigMaps }}
+            - configMapRef:
+                name: {{ . }}{{- end }}
+            {{- range .Values.common.extraEnvConfigMaps }}
+            - configMapRef:
+                name: {{ . }}{{- end }}
+            {{- range .Values.worker.extraEnvSecrets }}
+            - secretRef:
+                name: {{ . }}{{- end }}
+            {{- range .Values.common.extraEnvSecrets }}
+            - secretRef:
+                name: {{ . }}{{- end }}
+            {{- if .Values.externalSecrets.enabled }}    
+            - secretRef:
+                name: {{ include "application.externalSecrets.targetSecretName" . }}{{- end }}
+          {{- with .Values.worker.startupProbe }}
+          startupProbe: {{- toYaml . | nindent 12 }}{{- end }}
+          {{- with .Values.worker.livenessProbe }}
+          livenessProbe: {{- toYaml . | nindent 12 }}{{- end }}
+          {{- with .Values.worker.readinessProbe }}
+          readinessProbe: {{- toYaml . | nindent 12 }}{{- end }}
+          {{- with .Values.worker.volumeMounts }}
+          volumeMounts: {{- toYaml . | nindent 12 }}{{- end }}
+          securityContext:  {{- .Values.worker.containerSecurityContext | default .Values.common.containerSecurityContext | toYaml | nindent 12 }}
+        {{- with .Values.worker.sidecars }}
+        {{- include "application.render" ( dict "value" . "context" $) | nindent 8 }}
+        {{- end }}
+      topologySpreadConstraints:  {{- .Values.worker.topologySpreadConstraints | default .Values.common.topologySpreadConstraints | toYaml | nindent 8 }}
+      nodeSelector:               {{- .Values.worker.nodeSelector | default .Values.common.nodeSelector | toYaml | nindent 8 }}
+      tolerations:                {{- .Values.worker.tolerations | default .Values.common.tolerations | toYaml | nindent 8 }}
+      affinity:                   {{- .Values.worker.affinity | default .Values.common.affinity | toYaml | nindent 8 }}
+      securityContext:            {{- .Values.worker.podSecurityContext | default .Values.common.podSecurityContext | toYaml | nindent 8 }}
+      volumes: {{- .Values.worker.volumes | toYaml | nindent 8 }}
+{{- end }}
