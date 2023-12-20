@@ -1,0 +1,177 @@
+include:
+  project: applifting-cloud-engineering/cicd-templates
+  ref: main
+  file: 
+    - GitVersion/Base.gitlab-ci.yml
+
+variables:
+  HELM_CHART_NAME: "application"
+  HELM_CHART_PATH: /builds/applifting-cloud-engineering/helm/application
+#   GIT_NAME: applifting-devops-user
+#   GIT_EMAIL: devops@applifting.cz
+#   GIT_PASSWORD: $PUSH_TOKEN
+#   GIT_REPOSITORY: gitlab.com/applifting-cloud-engineering/helm/application.git
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $GITLAB_USER_LOGIN == $GIT_NAME'
+      when: never
+    - when: always
+
+image:
+  name: registry.gitlab.com/applifting-cloud-engineering/images/helm-kubectl:3.12.2-1.24.16
+  entrypoint: ["/bin/sh", "-c"]
+
+stages:
+  - generate-readme
+  - test
+  - versioning
+  - tag
+  - release
+
+# -----------------------------------------------------------------------------
+# Partial jobs
+# -----------------------------------------------------------------------------
+.generate-readme:
+  stage: generate-readme
+  image: node:lts-alpine
+  script:
+    - apk update
+    - apk add git
+    - npm install -g @bitnami/readme-generator-for-helm
+    - readme-generator --values "${HELM_CHART_PATH}/values.yaml" --readme "${HELM_CHART_PATH}/README.md"
+    # - >
+    #   if [ -n "$(git status --porcelain)" ]; then
+    #     git config user.name $GIT_NAME
+    #     git config user.email "$GIT_EMAIL"
+    #     git add ${HELM_CHART_PATH}/README.md
+    #     git commit -m "Update README with auto-docs";
+    #     git push -f "https://$GIT_NAME:$GIT_PASSWORD@$GIT_REPOSITORY" HEAD:$CI_COMMIT_REF_NAME;
+    #   else
+    #     echo "No changes to commit. Skipping commit and push.";
+    #   fi
+  artifacts:
+    paths:
+      - ${HELM_CHART_PATH}/README.md
+    expire_in: 1 day
+  allow_failure: true
+
+.lint:
+  stage: test
+  before_script:
+  script:
+    - helm lint .
+
+.security:
+  stage: test
+  before_script:
+    - apk add npm
+    - apk add nodejs
+    - npm install -g snyk
+    - snyk auth $SNYK_TOKEN
+    - cd chart
+    - helm dependency update
+  script:
+    - helm template . --output-dir out
+    - snyk iac test --json-file-output=application.json out/ || true
+  rules:
+    - changes:
+      - chart/*
+      - .gitlab-ci.yml
+      when: always
+    - when: never
+  artifacts:
+    paths:
+      - chart/application.json
+
+.unit:
+  stage: test
+  before_script:
+    - helm plugin update unittest
+  script:
+    - helm unittest chart
+
+.release:
+  stage: release
+  dependencies:
+    - versioning
+  # needs: ["security", "generate-readme", "unit"]
+  before_script:
+    - >
+      if [[ "${TAG_NAME}" == "" ]]; then
+        export CHART_VERSION=$CI_COMMIT_TAG
+      else
+        export CHART_VERSION=${TAG_NAME}
+      fi
+  script:
+    - helm repo add --username gitlab-ci-token --password ${CI_JOB_TOKEN} ${CI_PROJECT_NAME} ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/stable
+    - helm lint .
+    - helm package . --version "$CHART_VERSION"
+    - helm cm-push $HELM_CHART_NAME-*.*.*.tgz ${CI_PROJECT_NAME}
+
+# -----------------------------------------------------------------------------
+# application 
+# -----------------------------------------------------------------------------
+generate-readme:
+  extends: .generate-readme
+  rules:
+  - changes:
+    - $HELM_CHART_FOLDER/*
+    - .gitlab-ci.yml
+    when: always
+  - when: never
+
+lint:
+  extends: .lint
+  rules:
+    - changes:
+      - $HELM_CHART_FOLDER/*
+      - .gitlab-ci.yml
+      when: always
+    - when: never
+
+security:
+  extends: .security
+  needs: ["lint"]
+  rules:
+    - changes:
+      - $HELM_CHART_FOLDER/*
+      - .gitlab-ci.yml
+      when: always
+    - when: never
+
+unit:
+  extends: .unit
+  needs: ["security"]
+  rules:
+    - changes:
+      - $HELM_CHART_FOLDER/*
+      - .gitlab-ci.yml
+      when: always
+    - when: never
+
+versioning:
+  extends: .versioning
+  rules:
+    - changes:
+      - $HELM_CHART_FOLDER/*
+      - .gitlab-ci.yml
+
+tag:
+  extends: .tag
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: always
+    - when: never
+  needs: ["generate-readme","versioning"]
+
+release:
+  extends: .release
+  rules:
+    - changes:
+      - "$HELM_CHART_FOLDER/*"
+      - .gitlab-ci.yml
+      if: '$CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: always
+    - when: manual
+
