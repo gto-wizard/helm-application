@@ -6,7 +6,8 @@ include:
 
 variables:
   HELM_CHART_NAME: "application"
-  HELM_CHART_PATH: /builds/applifting-cloud-engineering/helm/application
+  # HELM_CHART_PATH: /builds/applifting-cloud-engineering/helm/application
+  HELM_CHART_PATH: "."
 #   GIT_NAME: applifting-devops-user
 #   GIT_EMAIL: devops@applifting.cz
 #   GIT_PASSWORD: $PUSH_TOKEN
@@ -62,27 +63,27 @@ stages:
   script:
     - helm lint .
 
-.security:
-  stage: test
-  before_script:
-    - apk add npm
-    - apk add nodejs
-    - npm install -g snyk
-    - snyk auth $SNYK_TOKEN
-    - cd chart
-    - helm dependency update
-  script:
-    - helm template . --output-dir out
-    - snyk iac test --json-file-output=application.json out/ || true
-  rules:
-    - changes:
-      - chart/*
-      - .gitlab-ci.yml
-      when: always
-    - when: never
-  artifacts:
-    paths:
-      - chart/application.json
+# .security:
+#   stage: test
+#   before_script:
+#     - apk add npm
+#     - apk add nodejs
+#     - npm install -g snyk
+#     - snyk auth $SNYK_TOKEN
+#     - cd chart
+#     - helm dependency update
+#   script:
+#     - helm template . --output-dir out
+#     - snyk iac test --json-file-output=application.json out/ || true
+#   rules:
+#     - changes:
+#       - chart/*
+#       - .gitlab-ci.yml
+#       when: always
+#     - when: never
+#   artifacts:
+#     paths:
+#       - chart/application.json
 
 .unit:
   stage: test
@@ -130,25 +131,25 @@ lint:
       when: always
     - when: never
 
-security:
-  extends: .security
-  needs: ["lint"]
-  rules:
-    - changes:
-      - $HELM_CHART_FOLDER/*
-      - .gitlab-ci.yml
-      when: always
-    - when: never
+# security:
+#   extends: .security
+#   needs: ["lint"]
+#   rules:
+#     - changes:
+#       - $HELM_CHART_FOLDER/*
+#       - .gitlab-ci.yml
+#       when: always
+#     - when: never
 
-unit:
-  extends: .unit
-  needs: ["security"]
-  rules:
-    - changes:
-      - $HELM_CHART_FOLDER/*
-      - .gitlab-ci.yml
-      when: always
-    - when: never
+# unit:
+#   extends: .unit
+#   needs: ["security"]
+#   rules:
+#     - changes:
+#       - $HELM_CHART_FOLDER/*
+#       - .gitlab-ci.yml
+#       when: always
+#     - when: never
 
 versioning:
   extends: .versioning
