@@ -10,7 +10,7 @@ metadata:
     {{- with .Values.common.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
     {{- with .Values.worker.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
 spec:
-  {{- if not .Values.worker.autoscaling.enabled }}
+  {{- if and (not .Values.worker.autoscaling.enabled) (not .Values.worker.scalingByKeda.enabled) }}
   replicas: {{ .Values.worker.replicaCount }}
   {{- end }}
   revisionHistoryLimit: {{ with .Values.worker.revisionHistoryLimit }}{{ . }}{{- end }}
