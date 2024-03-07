@@ -647,7 +647,7 @@ service:
   ## @param service.targetPortName String with name of the port to target
   targetPortName: http
 
-  ## @skip service.extraContainerPorts
+  ## @skip service.extraPorts
   extraPorts: []
   # extraPorts:
   #   - name: https
