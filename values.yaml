@@ -169,10 +169,6 @@ application:
   ## @param application.replicaCount Number of application replicas to deploy
   replicaCount: 1
 
-  ## @param application.scalingByKeda.enabled Whether scaling is managed by KEDA
-  scalingByKeda:
-    enabled: false
-
   ## Enable HorizontalPodAutoscaler for application pods
   autoscaling:
     ## @param application.autoscaling.enabled Whether enable horizontal pod autoscale
