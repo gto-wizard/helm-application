@@ -751,3 +751,48 @@ rbac:
   #     - secrets
   #     verbs:
   #     - get
+
+keda: ## Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/
+  enabled: false # KEDA is disabled by default
+  
+  ## @param keda.labels Array with labels to add to all pods
+  labels: {}
+
+  ## @param keda.annotations Array with annotations to add to all pods
+  annotations: {}
+  # annotations:
+  #   common: annotation
+
+  ## @param keda.pollingInterval This is the interval to check each trigger on
+  pollingInterval:  30
+
+  ## @param keda.cooldownPeriod The period to wait after the last trigger reported active before scaling the resource back to 0
+  cooldownPeriod:   300
+
+  ## @param keda.idleReplicaCount If this property is set, KEDA will scale the resource down to this number of replicas.
+  idleReplicaCount: 0
+
+  ## @param keda.minReplicaCount Minimum number of replicas KEDA will scale the resource down to.
+  minReplicaCount:  1
+
+  ## @param keda.maxReplicaCount This setting is passed to the HPA definition that KEDA will create for a given resource and holds the maximum number of replicas of the target resource.
+  maxReplicaCount:  100
+
+  ## @param keda.fallback Defines a number of replicas to fall back to if a scaler is in an error state.
+  fallback: {}
+
+  ## @param keda.advanced. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#advanced
+  advanced: {}
+
+  ## @param keda.triggers List of triggers to activate scaling of the target resource. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#triggers
+  triggers:
+    # - metricType: Utilization
+    #   type: memory
+    #   metadata:
+    #     value: "40"
+    # - type: azure-servicebus
+    #   metadata:
+    #     topicName: sbtopic-app-service
+    #     subscriptionName: sbsub-app-service
+    #     namespace: servicebus-app-ns
+    #     messageCount: 50 # queue size treshold KEDA needs to hit to scale up/down 
