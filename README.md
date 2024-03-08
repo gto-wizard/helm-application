@@ -198,7 +198,7 @@
 | Name           | Description                                | Value   |
 | -------------- | ------------------------------------------ | ------- |
 | `rbac.enabled` | Specifies whether a role should be created | `false` |
-| `rbac.roles`   | Create Roles (Namespaced)                  | `nil`   |
+| `rbac.roles`   | Create Roles (Namespaced)                  | `[]`    |
 
 ### Keda ScaledObject parameters. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/
 
@@ -212,6 +212,6 @@
 | `keda.idleReplicaCount` | If this property is set, KEDA will scale the resource down to this number of replicas.                                                                   | `0`     |
 | `keda.minReplicaCount`  | Minimum number of replicas KEDA will scale the resource down to.                                                                                         | `1`     |
 | `keda.maxReplicaCount`  | This setting is passed to the HPA definition that KEDA will create for a given resource and holds the maximum number of replicas of the target resource. | `100`   |
-| `keda.fallback`         | Defines a number of replicas to fall back to if a scaler is in an error state.                                                                           | `{}`    |
+| `keda.fallback`         | Defines a number of replicas to fall back to if a scaler is in an error state. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#fallback     | `{}`    |
 | `keda.advanced`         | Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#advanced                                                                                    | `{}`    |
-| `keda.triggers`         | List of triggers to activate scaling of the target resource. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#triggers                       | `nil`   |
+| `keda.triggers`         | List of triggers to activate scaling of the target resource. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#triggers                       | `[]`    |
