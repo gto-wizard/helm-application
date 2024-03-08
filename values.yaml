@@ -740,24 +740,25 @@ rbac:
   ## @param rbac.enabled Specifies whether a role should be created
   enabled: false
 
-  ## @param rbac.roles Create Roles (Namespaced)
-  roles:
-  # - name: configmaps
-  #   rules:
-  #   - apiGroups:
-  #     - ""
-  #     resources:
-  #     - configmaps
-  #     verbs:
-  #     - get
-  # - name: secrets
-  #   rules:
-  #   - apiGroups:
-  #     - ""
-  #     resources:
-  #     - secrets
-  #     verbs:
-  #     - get
+  ## @param rbac.roles [array] Create Roles (Namespaced)
+  roles: null
+  # roles:
+  #   - name: configmaps
+  #     rules:
+  #     - apiGroups:
+  #       - ""
+  #       resources:
+  #       - configmaps
+  #       verbs:
+  #       - get
+  #   - name: secrets
+  #     rules:
+  #     - apiGroups:
+  #       - ""
+  #       resources:
+  #       - secrets
+  #       verbs:
+  #       - get
 
 ## @section Keda ScaledObject parameters. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/
 keda:
@@ -788,21 +789,22 @@ keda:
   ## @param keda.maxReplicaCount This setting is passed to the HPA definition that KEDA will create for a given resource and holds the maximum number of replicas of the target resource.
   maxReplicaCount:  100
 
-  ## @param keda.fallback Defines a number of replicas to fall back to if a scaler is in an error state.
-  fallback: {}
+  ## @param keda.fallback [object] Defines a number of replicas to fall back to if a scaler is in an error state. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#fallback
+  fallback: null
 
-  ## @param keda.advanced Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#advanced
-  advanced: {}
+  ## @param keda.advanced [object] Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#advanced
+  advanced: null
 
-  ## @param keda.triggers List of triggers to activate scaling of the target resource. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#triggers
-  triggers:
-    # - metricType: Utilization
-    #   type: memory
-    #   metadata:
-    #     value: "40"
-    # - type: azure-servicebus
-    #   metadata:
-    #     topicName: sbtopic-app-service
-    #     subscriptionName: sbsub-app-service
-    #     namespace: servicebus-app-ns
-    #     messageCount: 50 # queue size treshold KEDA needs to hit to scale up/down 
+  ## @param keda.triggers [array] List of triggers to activate scaling of the target resource. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#triggers
+  triggers: null
+  # triggers:
+  #   - metricType: Utilization
+  #     type: memory
+  #     metadata:
+  #       value: "40"
+  #   - type: azure-servicebus
+  #     metadata:
+  #       topicName: sbtopic-app-service
+  #       subscriptionName: sbsub-app-service
+  #       namespace: servicebus-app-ns
+  #       messageCount: 50 # queue size treshold KEDA needs to hit to scale up/down 
