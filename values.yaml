@@ -729,11 +729,12 @@ serviceMonitor:
   ## @param serviceMonitor.scrapeTimeout Timeout after which the scrape is ended
   scrapeTimeout: ""
 
+## @section RBAC parameters.
 rbac:
   ## @param rbac.enabled Specifies whether a role should be created
   enabled: false
 
-  # @param rbac.roles Create Roles (Namespaced)
+  ## @param rbac.roles Create Roles (Namespaced)
   roles:
   # - name: configmaps
   #   rules:
@@ -752,8 +753,11 @@ rbac:
   #     verbs:
   #     - get
 
-keda: ## Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/
-  enabled: false # KEDA is disabled by default
+## @section Keda ScaledObject parameters. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/
+keda:
+
+  ## @param keda.enabled Specifies whether a KEDA ScaledObject should be created
+  enabled: false
   
   ## @param keda.labels Array with labels to add to all pods
   labels: {}
@@ -781,7 +785,7 @@ keda: ## Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/
   ## @param keda.fallback Defines a number of replicas to fall back to if a scaler is in an error state.
   fallback: {}
 
-  ## @param keda.advanced. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#advanced
+  ## @param keda.advanced Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#advanced
   advanced: {}
 
   ## @param keda.triggers List of triggers to activate scaling of the target resource. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#triggers
