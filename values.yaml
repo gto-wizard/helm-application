@@ -99,6 +99,12 @@ application:
   # annotations:
   #   application: annotation
 
+  ## @param application.lifecycle Array with lifecycle definitions to add to application deployment
+  lifecycle: {}
+  # lifecycle:
+  #   preStop:
+  #     exec:
+  #       command: ["/bin/sh", "-c", "sleep 10"]
   
   ## @param application.topologySpreadConstraints  list with constraints controlling how pods are spread across the cluster. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
   topologySpreadConstraints: []
