@@ -1,5 +1,5 @@
-{{- if .Values.worker.autoscaling.enabled }}
-apiVersion: autoscaling/v2beta1
+{{- if and (.Values.worker.autoscaling.enabled) (not .Values.worker.scalingByKeda.enabled) }}
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "application.name" .  }}-worker

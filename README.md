@@ -1,7 +1,5 @@
 # application
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
-
 ## Parameters
 
 ### Global parameters
@@ -34,6 +32,7 @@
 | `application.enableDeployment`                              | Specifies whether a application deployment should be created                                                                                                                                          | `true`          |
 | `application.labels`                                        | Array with labels to add to application deployment                                                                                                                                                    | `{}`            |
 | `application.annotations`                                   | Array with annotations to add to application deployment                                                                                                                                               | `{}`            |
+| `application.lifecycle`                                     | Array with lifecycle definitions to add to application deployment                                                                                                                                     | `{}`            |
 | `application.topologySpreadConstraints`                     | list with constraints controlling how pods are spread across the cluster. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/                                   | `[]`            |
 | `application.nodeSelector`                                  | Array with Node labels for application pods assignment. ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector                                                    | `{}`            |
 | `application.tolerations`                                   | list with Tolerations for application pods assignment. ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/                                                             | `[]`            |
@@ -43,6 +42,7 @@
 | `application.job.restartPolicy`                             | Only a RestartPolicy equal to Never or OnFailure is allowed                                                                                                                                           | `Never`         |
 | `application.podAnnotations`                                | Annotations for application pods. ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/                                                                                 | `{}`            |
 | `application.containerPort`                                 | Map container ports to host ports                                                                                                                                                                     | `80`            |
+| `application.containerPortName`                             | Names the default container port                                                                                                                                                                      | `http`          |
 | `application.replicaCount`                                  | Number of application replicas to deploy                                                                                                                                                              | `1`             |
 | `application.autoscaling.enabled`                           | Whether enable horizontal pod autoscale                                                                                                                                                               | `false`         |
 | `application.autoscaling.minReplicas`                       | Configure a minimum amount of pods                                                                                                                                                                    | `1`             |
@@ -102,6 +102,7 @@
 | `worker.affinity`                                      | Array with Affinity for worker pods assignment                                                                                                                                                                                         | `{}`            |
 | `worker.podAnnotations`                                | Annotations for worker pods. ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/                                                                                                                       | `{}`            |
 | `worker.replicaCount`                                  | Number of worker replicas to deploy                                                                                                                                                                                                    | `1`             |
+| `worker.scalingByKeda.enabled`                         | Whether scaling is managed by KEDA                                                                                                                                                                                                     | `false`         |
 | `worker.autoscaling.enabled`                           | Whether enable horizontal pod autoscale                                                                                                                                                                                                | `false`         |
 | `worker.autoscaling.minReplicas`                       | Configure a minimum amount of pods                                                                                                                                                                                                     | `1`             |
 | `worker.autoscaling.maxReplicas`                       | Configure a maximum amount of pods                                                                                                                                                                                                     | `100`           |
@@ -126,18 +127,19 @@
 
 ### External Secrets parameters
 
-| Name                               | Description                                                                                                                                                                      | Value   |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `externalSecrets.enabled`          | Specifies whether a automatic external secrets should be integrated                                                                                                              | `false` |
-| `externalSecrets.labels`           | Array with labels to add to externalSecrets                                                                                                                                      | `{}`    |
-| `externalSecrets.annotations`      | Array with annotations to add to externalSecrets                                                                                                                                 | `{}`    |
-| `externalSecrets.secretStoreName`  | SecretStore is created by Terraform with the name `$APP_NAME-$APP_ENVIRONMENT`                                                                                                   | `nil`   |
-| `externalSecrets.targetSecretName` | String with name for the target secret                                                                                                                                           | `""`    |
-| `externalSecrets.creationPolicy`   | String with definition of how the operator creates the a secret                                                                                                                  | `Owner` |
-| `externalSecrets.variables`        | list of variable names from GitLab to expose to the container                                                                                                                    | `[]`    |
-| `externalSecrets.extract`          | list of variable names containing JSON objects that will be expanded to environment variables - each key inside the JSON object will correspond to a single environment variable | `[]`    |
-| `externalSecrets.findRegex`        | string used to find secrets based on regular expressions and rewrite the key names.                                                                                              | `""`    |
-| `externalSecrets.extraDataFrom`    | List of objects used to fetch all properties from the Provider key                                                                                                               | `[]`    |
+| Name                               | Description                                                                                                                                                                      | Value         |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `externalSecrets.enabled`          | Specifies whether a automatic external secrets should be integrated                                                                                                              | `false`       |
+| `externalSecrets.labels`           | Array with labels to add to externalSecrets                                                                                                                                      | `{}`          |
+| `externalSecrets.annotations`      | Array with annotations to add to externalSecrets                                                                                                                                 | `{}`          |
+| `externalSecrets.secretStoreKind`  | String with kind of the SecretStore resource (SecretStore or ClusterSecretStore) Defaults to SecretStore                                                                         | `SecretStore` |
+| `externalSecrets.secretStoreName`  | SecretStore is created by Terraform with the name `$APP_NAME-$APP_ENVIRONMENT`                                                                                                   | `nil`         |
+| `externalSecrets.targetSecretName` | String with name for the target secret                                                                                                                                           | `""`          |
+| `externalSecrets.creationPolicy`   | String with definition of how the operator creates the a secret                                                                                                                  | `Owner`       |
+| `externalSecrets.variables`        | list of variable names from GitLab to expose to the container                                                                                                                    | `[]`          |
+| `externalSecrets.extract`          | list of variable names containing JSON objects that will be expanded to environment variables - each key inside the JSON object will correspond to a single environment variable | `[]`          |
+| `externalSecrets.findRegex`        | string used to find secrets based on regular expressions and rewrite the key names.                                                                                              | `""`          |
+| `externalSecrets.extraDataFrom`    | List of objects used to fetch all properties from the Provider key                                                                                                               | `[]`          |
 
 ### Service Account parameters
 
@@ -159,14 +161,16 @@
 
 ### Service parameters
 
-| Name                  | Description                                                      | Value       |
-| --------------------- | ---------------------------------------------------------------- | ----------- |
-| `service.enabled`     | Specifies whether a service should be created                    | `true`      |
-| `service.labels`      | Array with labels to add to service                              | `{}`        |
-| `service.annotations` | Array with annotations to add to service                         | `{}`        |
-| `service.type`        | String which allows you to specify what kind of Service you want | `ClusterIP` |
-| `service.port`        | Intiger with incoming port                                       | `80`        |
-| `service.name`        | String with name of the port                                     | `http`      |
+| Name                     | Description                                                      | Value       |
+| ------------------------ | ---------------------------------------------------------------- | ----------- |
+| `service.enabled`        | Specifies whether a service should be created                    | `true`      |
+| `service.labels`         | Array with labels to add to service                              | `{}`        |
+| `service.annotations`    | Array with annotations to add to service                         | `{}`        |
+| `service.type`           | String which allows you to specify what kind of Service you want | `ClusterIP` |
+| `service.port`           | Intiger with incoming port                                       | `80`        |
+| `service.name`           | String with name of the port                                     | `http`      |
+| `service.targetPortName` | String with name of the port to target                           | `http`      |
+| `service.extraPorts`     | Map with extra container ports                                   | `[]`        |
 
 ### Ingress parameters
 
@@ -187,3 +191,26 @@
 | `serviceMonitor.scheme`        | HTTP scheme to use for scraping.                      | `""`       |
 | `serviceMonitor.tlsConfig`     | TLS configuration to use when scraping the endpoint   | `{}`       |
 | `serviceMonitor.scrapeTimeout` | Timeout after which the scrape is ended               | `""`       |
+
+### RBAC parameters.
+
+| Name           | Description                                | Value   |
+| -------------- | ------------------------------------------ | ------- |
+| `rbac.enabled` | Specifies whether a role should be created | `false` |
+| `rbac.roles`   | Create Roles (Namespaced)                  | `[]`    |
+
+### Keda ScaledObject parameters. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/
+
+| Name                    | Description                                                                                                                                              | Value   |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `keda.enabled`          | Specifies whether a KEDA ScaledObject should be created                                                                                                  | `false` |
+| `keda.labels`           | Array with labels to add to all pods                                                                                                                     | `{}`    |
+| `keda.annotations`      | Array with annotations to add to all pods                                                                                                                | `{}`    |
+| `keda.pollingInterval`  | This is the interval to check each trigger on                                                                                                            | `30`    |
+| `keda.cooldownPeriod`   | The period to wait after the last trigger reported active before scaling the resource back to 0                                                          | `300`   |
+| `keda.idleReplicaCount` | If this property is set, KEDA will scale the resource down to this number of replicas.                                                                   | `0`     |
+| `keda.minReplicaCount`  | Minimum number of replicas KEDA will scale the resource down to.                                                                                         | `1`     |
+| `keda.maxReplicaCount`  | This setting is passed to the HPA definition that KEDA will create for a given resource and holds the maximum number of replicas of the target resource. | `100`   |
+| `keda.fallback`         | Defines a number of replicas to fall back to if a scaler is in an error state. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#fallback     | `{}`    |
+| `keda.advanced`         | Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#advanced                                                                                    | `{}`    |
+| `keda.triggers`         | List of triggers to activate scaling of the target resource. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#triggers                       | `[]`    |

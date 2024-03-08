@@ -1,5 +1,5 @@
-{{- if .Values.application.autoscaling.enabled }}
-apiVersion: autoscaling/v2beta1
+{{- if and (.Values.application.autoscaling.enabled) (not .Values.keda.enabled) }}
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "application.name" . | quote }}

@@ -10,7 +10,7 @@ metadata:
     {{- with .Values.common.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
     {{- with .Values.application.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
 spec:
-  {{- if not .Values.application.autoscaling.enabled }}
+  {{- if and (not .Values.application.autoscaling.enabled) (not .Values.keda.enabled) }}
   replicas: {{ .Values.application.replicaCount }}
   {{- end }}
   revisionHistoryLimit: {{ with .Values.application.revisionHistoryLimit }}{{ . }}{{- end }}
@@ -34,6 +34,7 @@ spec:
         - name: {{ .Chart.Name }}
           image: {{ include "application.image" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          lifecycle: {{- toYaml .Values.application.lifecycle | nindent 12 }}
           command: {{- toYaml .Values.application.command | nindent 12 }}
           args: {{- toYaml .Values.application.args | nindent 12 }}
           ports:

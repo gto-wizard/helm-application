@@ -99,6 +99,12 @@ application:
   # annotations:
   #   application: annotation
 
+  ## @param application.lifecycle Array with lifecycle definitions to add to application deployment
+  lifecycle: {}
+  # lifecycle:
+  #   preStop:
+  #     exec:
+  #       command: ["/bin/sh", "-c", "sleep 10"]
   
   ## @param application.topologySpreadConstraints  list with constraints controlling how pods are spread across the cluster. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
   topologySpreadConstraints: []
@@ -421,6 +427,10 @@ worker:
   ## @param worker.replicaCount Number of worker replicas to deploy
   replicaCount: 1
 
+  ## @param worker.scalingByKeda.enabled Whether scaling is managed by KEDA
+  scalingByKeda:
+    enabled: false
+
   ## Enable HorizontalPodAutoscaler for worker pods
   autoscaling:
     ## @param worker.autoscaling.enabled  Whether enable horizontal pod autoscale
@@ -639,7 +649,7 @@ service:
   ## @param service.targetPortName String with name of the port to target
   targetPortName: http
 
-  ## @skip service.extraContainerPorts
+  ## @param service.extraPorts Map with extra container ports
   extraPorts: []
   # extraPorts:
   #   - name: https
@@ -721,3 +731,76 @@ serviceMonitor:
   ## @param serviceMonitor.scrapeTimeout Timeout after which the scrape is ended
   scrapeTimeout: ""
 
+## @section RBAC parameters.
+rbac:
+  ## @param rbac.enabled Specifies whether a role should be created
+  enabled: false
+
+  ## @param rbac.roles [array] Create Roles (Namespaced)
+  roles: null
+  # roles:
+  #   - name: configmaps
+  #     rules:
+  #     - apiGroups:
+  #       - ""
+  #       resources:
+  #       - configmaps
+  #       verbs:
+  #       - get
+  #   - name: secrets
+  #     rules:
+  #     - apiGroups:
+  #       - ""
+  #       resources:
+  #       - secrets
+  #       verbs:
+  #       - get
+
+## @section Keda ScaledObject parameters. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/
+keda:
+
+  ## @param keda.enabled Specifies whether a KEDA ScaledObject should be created
+  enabled: false
+  
+  ## @param keda.labels Array with labels to add to all pods
+  labels: {}
+
+  ## @param keda.annotations Array with annotations to add to all pods
+  annotations: {}
+  # annotations:
+  #   common: annotation
+
+  ## @param keda.pollingInterval This is the interval to check each trigger on
+  pollingInterval:  30
+
+  ## @param keda.cooldownPeriod The period to wait after the last trigger reported active before scaling the resource back to 0
+  cooldownPeriod:   300
+
+  ## @param keda.idleReplicaCount If this property is set, KEDA will scale the resource down to this number of replicas.
+  idleReplicaCount: 0
+
+  ## @param keda.minReplicaCount Minimum number of replicas KEDA will scale the resource down to.
+  minReplicaCount:  1
+
+  ## @param keda.maxReplicaCount This setting is passed to the HPA definition that KEDA will create for a given resource and holds the maximum number of replicas of the target resource.
+  maxReplicaCount:  100
+
+  ## @param keda.fallback [object] Defines a number of replicas to fall back to if a scaler is in an error state. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#fallback
+  fallback: null
+
+  ## @param keda.advanced [object] Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#advanced
+  advanced: null
+
+  ## @param keda.triggers [array] List of triggers to activate scaling of the target resource. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#triggers
+  triggers: null
+  # triggers:
+  #   - metricType: Utilization
+  #     type: memory
+  #     metadata:
+  #       value: "40"
+  #   - type: azure-servicebus
+  #     metadata:
+  #       topicName: sbtopic-app-service
+  #       subscriptionName: sbsub-app-service
+  #       namespace: servicebus-app-ns
+  #       messageCount: 50 # queue size treshold KEDA needs to hit to scale up/down 
