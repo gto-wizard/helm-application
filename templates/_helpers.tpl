@@ -44,14 +44,6 @@ component: app
 {{- end }}
 
 {{/*
-Selector labels for worker deployment
-*/}}
-{{- define "application.selectorLabels.worker" -}}
-{{- include "application.selectorLabels" . }}
-component: worker
-{{- end }}
-
-{{/*
 Create the name of the service account to use
 */}}
 {{- define "application.serviceAccountName" -}}
@@ -83,25 +75,6 @@ Usage:
 {{- if .Values.image.overrideTag }}:{{ .Values.image.overrideTag }}
 {{- else if .Values.image.shasum }}@{{ .Values.image.shasum }}
 {{- else if .Values.image.tag }}:{{ .Values.image.tag }}{{- end }}
-{{- end -}}
-
-{{/*
-Creates image conditions with option to override tag for worker deployment
-Usage:
-{{ include "application.worker.image" . }}
-*/}}
-{{- define "application.worker.image" -}}
-{{- if .Values.worker.imageDiff }}
-{{- .Values.worker.image.repository }} 
-{{- if .Values.worker.image.overrideTag }}:{{ .Values.worker.image.overrideTag }}
-{{- else if .Values.worker.image.shasum }}@{{ .Values.worker.image.shasum }}
-{{- else if .Values.worker.image.tag }}:{{ .Values.worker.image.tag }}{{- end }}
-{{- else }}
-{{- include "application.image" . }}
-{{- end }}
-{{- end -}}
-
-{{/*
 {{- end -}}
 
 {{/*

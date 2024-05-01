@@ -5,6 +5,6 @@ description: Universal Helm chart used for deployment of GTO Wizard services
 
 type: application
 sources:
-  - https://gitlab.com/gto-wizard/devops/helm-charts/application
+  - CHART_PROJECT_URL
 
-version: 0.1.0-alpha.34
+version: CHART_VERSION
