@@ -51,6 +51,9 @@ spec:
               value: {{ $value | quote }}
             {{- end }}
           envFrom:
+            {{- if .Values.configmap.enabled }}
+            - configMapRef:
+                name: {{ default (include "application.name" .) .Values.configmap.name }}{{- end }}
             {{- range .Values.application.extraEnvConfigMaps }}
             - configMapRef:
                 name: {{ . }}{{- end }}
