@@ -169,6 +169,11 @@ application:
   ## @param application.replicaCount Number of application replicas to deploy
   replicaCount: 1
 
+  ## @param application.podDisruptionBudget Limit the number of concurrent disruptions that your application experiences. Ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+  podDisruptionBudget: {}
+    # maxUnavailable: 1
+    # minAvailable: 1
+
   ## Enable HorizontalPodAutoscaler for application pods
   autoscaling:
     ## @param application.autoscaling.enabled Whether enable horizontal pod autoscale
