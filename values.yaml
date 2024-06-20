@@ -283,6 +283,9 @@ application:
   #     cpu: 100m
   #     memory: 128Mi
 
+  ## @param application.terminationGracePeriodSeconds Graceful termination timeout
+  terminationGracePeriodSeconds:
+
 ## @section Cronjob parameters
 
 cronjob:

@@ -89,5 +89,6 @@ spec:
       affinity:                   {{- .Values.application.affinity | default .Values.common.affinity | toYaml | nindent 8 }}
       securityContext:            {{- .Values.application.podSecurityContext | default .Values.common.podSecurityContext | toYaml | nindent 8 }}
       volumes: {{- toYaml .Values.application.volumes | nindent 8 }}
+      terminationGracePeriodSeconds: {{ .Values.application.terminationGracePeriodSeconds }}
 {{- end }}
 

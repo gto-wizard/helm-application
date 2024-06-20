@@ -66,6 +66,7 @@
 | `application.readinessProbe`                                | customize readinessProbe on application pods                                                                                                                                                          | `{}`            |
 | `application.podSecurityContext`                            | Set application pod's Security Context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod                                            | `{}`            |
 | `application.containerSecurityContext`                      | Set Configure Container Security Context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container                                    | `{}`            |
+| `application.terminationGracePeriodSeconds`                 | Graceful termination timeout                                                                                                                                                                          | `nil`           |
 
 ### Cronjob parameters
 
