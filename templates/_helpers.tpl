@@ -48,7 +48,9 @@ Create the name of the service account to use
 */}}
 {{- define "application.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "application.name" . ) .Values.serviceAccount.name }}
+{{- default (include "application.name" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
