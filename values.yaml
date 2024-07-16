@@ -126,8 +126,13 @@ application:
   affinity: {}
 
   job:
+    ## @param application.job.command enables job
+    enabled: false
 
-    ## @param application.job.migrateCommand Providing enables migrating job
+    ## @param application.job.migrateCommand Command for job
+    command: [""]
+
+    ## @param application.job.migrateCommand Arguments for job
     migrateCommand: ""
 
     ## @param application.job.nameSuffix Adds name suffix to job deployment
