@@ -40,9 +40,11 @@ spec:
           command: {{- toYaml .Values.application.command | nindent 12 }}
           args: {{- toYaml .Values.application.args | nindent 12 }}
           ports:
+            {{- if .Values.application.containerPortEnabled }}
             - name: {{ .Values.application.containerPortName }}
               containerPort: {{ .Values.application.containerPort }}
               protocol: TCP
+            {{- end }}
             {{- with .Values.application.extraContainerPorts }}
             {{- include "application.render" ( dict "value" . "context" $) | nindent 12 }}
             {{- end }}
@@ -68,9 +70,14 @@ spec:
             {{- range .Values.common.extraEnvSecrets }}
             - secretRef:
                 name: {{ . }}{{- end }}
-            {{- if .Values.externalSecrets.enabled }}    
+            {{- if .Values.externalSecrets.enabled }}
+            {{- range .Values.externalSecrets.secrets }}
+            {{- if .exposeToEnv }}
             - secretRef:
-                name: {{ include "application.externalSecrets.targetSecretName" . }}{{- end }}
+                name: {{ .targetSecretName | quote }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
           {{- with .Values.application.startupProbe }}
           startupProbe: {{- toYaml . | nindent 12 }}{{- end }}
           {{- with .Values.application.livenessProbe }}
@@ -83,6 +90,7 @@ spec:
         {{- with .Values.application.sidecars }}
         {{- include "application.render" ( dict "value" . "context" $) | nindent 8 }}
         {{- end }}
+      terminationGracePeriodSeconds: {{- .Values.application.terminationGracePeriodSeconds | toYaml | nindent 8 }}
       topologySpreadConstraints:  {{- .Values.application.topologySpreadConstraints | default .Values.common.topologySpreadConstraints | toYaml | nindent 8 }}
       nodeSelector:               {{- .Values.application.nodeSelector | default .Values.common.nodeSelector | toYaml | nindent 8 }}
       tolerations:                {{- .Values.application.tolerations | default .Values.common.tolerations | toYaml | nindent 8 }}

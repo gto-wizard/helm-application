@@ -1,7 +1,7 @@
 include:
   project: applifting-cloud-engineering/cicd-templates
   ref: main
-  file: 
+  file:
     - GitVersion/Base.gitlab-ci.yml
 
 variables:
