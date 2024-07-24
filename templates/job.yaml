@@ -1,62 +1,79 @@
-{{- if .Values.application.job.enabled -}}
+{{- range .Values.application.jobs }}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "application.name" . }}{{- with .Values.application.job.nameSuffix }}-{{- . }}{{- end }}
+  name: {{ include "application.name" $ }}{{- with .nameSuffix }}-{{- . }}{{- end }}
   labels:
-    {{- include "application.labels" . | nindent 4 }}
-    {{- with .Values.application.labels }}{{- toYaml . | nindent 4 }}{{- end }}
+    {{- include "application.labels" $ | nindent 4 }}
+    {{- with $.Values.application.labels }}{{- toYaml . | nindent 4 }}{{- end }}
+    {{- with .labels }}{{- toYaml . | nindent 4 }}{{- end }}
   annotations:
-    {{- with .Values.common.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
-    {{- with .Values.application.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
-    {{- with .Values.application.job.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
+    {{- with $.Values.common.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
+    {{- with $.Values.application.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
+    {{- with .annotations }}{{- toYaml . | nindent 4 }}{{- end }}
 spec:
   template:
     metadata:
       labels:
-        {{- include "application.selectorLabels" . | nindent 8 }}
+        {{- include "application.selectorLabels" $ | nindent 8 }}
     spec:
-      restartPolicy: {{ .Values.application.job.restartPolicy }}
-      {{- with .Values.imagePullSecrets }}
+      restartPolicy: {{ .restartPolicy }}
+      {{- with $.Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "application.serviceAccountName" $ }}
       containers:
-      - name: {{ .Chart.Name }}
-        image: {{ include "application.image" . | quote }}
-        {{- if .Values.application.job.command }}
-        command:  {{- range .Values.application.job.command }}
-        - {{ . }} {{- end}}
-        {{- end}}
-        args: ["{{ .Values.application.job.migrateCommand }}"]
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+      - name: {{ $.Chart.Name }}
+        image: {{ include "application.image" $ | quote }}
+        command: {{- toYaml .command | nindent 10 }}
+        {{- with .args }}
+        args:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        imagePullPolicy: {{ $.Values.image.pullPolicy }}
+        lifecycle: {{- toYaml .lifecycle | nindent 10 }}
         env:
-          {{- range $key, $value := merge .Values.application.env .Values.common.env }}
+          {{- range $key, $value := merge (default dict .env) $.Values.application.env $.Values.common.env }}
           - name: {{ $key }}
             value: {{ $value | quote }}
           {{- end }}
         envFrom:
-          {{- if .Values.configmap.enabled }}
+          {{- if $.Values.configmap.enabled }}
           - configMapRef:
-              name: {{ default (include "application.name" .) .Values.configmap.name }}{{- end }}
-          {{- range .Values.application.extraEnvConfigMaps }}
-          - configMapRef:
-              name: {{ . }}{{- end }}
-          {{- range .Values.common.extraEnvConfigMaps }}
+              name: {{ default (include "application.name" $) $.Values.configmap.name }}{{- end }}
+          {{- range $.Values.application.extraEnvConfigMaps }}
           - configMapRef:
               name: {{ . }}{{- end }}
-          {{- range .Values.application.extraEnvSecrets }}
+          {{- range $.Values.common.extraEnvConfigMaps }}
+          - configMapRef:
+              name: {{ . }}{{- end }}
+          {{- range .extraEnvSecrets }}
           - secretRef:
               name: {{ . }}{{- end }}
-          {{- range .Values.common.extraEnvSecrets }}
+          {{- range $.Values.application.extraEnvSecrets }}
           - secretRef:
               name: {{ . }}{{- end }}
-          {{- if .Values.externalSecrets.enabled }}    
+          {{- range $.Values.common.extraEnvSecrets }}
           - secretRef:
-              name: {{ include "application.externalSecrets.targetSecretName" . }}{{- end }}
-        securityContext: {{- .Values.application.containerSecurityContext | default .Values.common.containerSecurityContext | toYaml | nindent 10 }}
-      nodeSelector:      {{- .Values.application.nodeSelector | default .Values.common.nodeSelector | toYaml | nindent 8 }}      
-      tolerations:      {{- .Values.application.tolerations | default .Values.common.tolerations | toYaml | nindent 8 }}
-      affinity:         {{- .Values.application.affinity | default .Values.common.affinity | toYaml | nindent 8 }}       
-      securityContext:  {{- .Values.application.podSecurityContext | default .Values.common.podSecurityContext | toYaml | nindent 8 }}
+              name: {{ . }}{{- end }}
+          {{- if $.Values.externalSecrets.enabled }}
+          {{- range $.Values.externalSecrets.secrets }}
+          {{- if .exposeToEnv }}
+          - secretRef:
+              name: {{ .targetSecretName | quote }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
+        {{- with $.Values.application.volumeMounts }}
+        volumeMounts: {{- toYaml . | nindent 10 }}{{- end }}
+        securityContext: {{- $.Values.application.containerSecurityContext | default $.Values.common.containerSecurityContext | toYaml | nindent 10 }}
+      nodeSelector:      {{- $.Values.application.nodeSelector | default $.Values.common.nodeSelector | toYaml | nindent 8 }}
+      tolerations:      {{- $.Values.application.tolerations | default $.Values.common.tolerations | toYaml | nindent 8 }}
+      affinity:         {{- $.Values.application.affinity | default $.Values.common.affinity | toYaml | nindent 8 }}
+      securityContext:  {{- $.Values.application.podSecurityContext | default $.Values.common.podSecurityContext | toYaml | nindent 8 }}
+      volumes:
+        {{- with $.Values.application.volumes }}{{- toYaml . | nindent 8 }}{{- end }}
+        {{- with .volumes }}{{- toYaml . | nindent 8 }}{{- end }}
+---
 {{- end -}}

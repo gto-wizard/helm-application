@@ -73,21 +73,8 @@ Usage:
 {{ include "application.image" }}
 */}}
 {{- define "application.image" -}}
-{{- .Values.image.repository }} 
+{{- .Values.image.repository }}
 {{- if .Values.image.overrideTag }}:{{ .Values.image.overrideTag }}
 {{- else if .Values.image.shasum }}@{{ .Values.image.shasum }}
 {{- else if .Values.image.tag }}:{{ .Values.image.tag }}{{- end }}
-{{- end -}}
-
-{{/*
-String with name for the target secret
-Usage:
-{{ include "application.externalSecrets.targetSecretName" . }}
-*/}}
-{{- define "application.externalSecrets.targetSecretName" -}}
-{{- if .Values.externalSecrets.targetSecretName }}
-{{- .Values.externalSecrets.targetSecretName }}
-{{- else }}
-{{- .Release.Name }}-secret-env  
-{{- end }}
 {{- end -}}
