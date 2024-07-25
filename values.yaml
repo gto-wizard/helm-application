@@ -12,7 +12,7 @@ image:
   shasum: ""
   overrideTag: ""
 
-## @param imagePullSecrets[0].name List of secrets containing credentials to image registry
+## @param imagePullSecrets List of secrets containing credentials to image registry
 imagePullSecrets:
   # - name: regcred
 
