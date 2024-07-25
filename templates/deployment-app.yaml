@@ -90,13 +90,12 @@ spec:
         {{- with .Values.application.sidecars }}
         {{- include "application.render" ( dict "value" . "context" $) | nindent 8 }}
         {{- end }}
-      terminationGracePeriodSeconds: {{- .Values.application.terminationGracePeriodSeconds | toYaml | nindent 8 }}
+      terminationGracePeriodSeconds: {{ .Values.application.terminationGracePeriodSeconds }}
       topologySpreadConstraints:  {{- .Values.application.topologySpreadConstraints | default .Values.common.topologySpreadConstraints | toYaml | nindent 8 }}
       nodeSelector:               {{- .Values.application.nodeSelector | default .Values.common.nodeSelector | toYaml | nindent 8 }}
       tolerations:                {{- .Values.application.tolerations | default .Values.common.tolerations | toYaml | nindent 8 }}
       affinity:                   {{- .Values.application.affinity | default .Values.common.affinity | toYaml | nindent 8 }}
       securityContext:            {{- .Values.application.podSecurityContext | default .Values.common.podSecurityContext | toYaml | nindent 8 }}
       volumes: {{- toYaml .Values.application.volumes | nindent 8 }}
-      terminationGracePeriodSeconds: {{ .Values.application.terminationGracePeriodSeconds }}
 {{- end }}
 
