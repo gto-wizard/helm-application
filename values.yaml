@@ -14,13 +14,13 @@ image:
 
 ## @param imagePullSecrets[0].name List of secrets containing credentials to image registry
 imagePullSecrets:
-  - name: regcred
+  # - name: regcred
 
 
 ## @param nameOverride String to fully override application.name template
 nameOverride: ""
 
-## @section Common parameters 
+## @section Common parameters
 
 ## settings and values to add to all deployed objects
 
@@ -57,7 +57,7 @@ common:
   env: {}
   # env:
   #   key: value
-  
+
   ## @param common.extraEnvConfigMaps Name of existing ConfigMap containing extra env vars for main deployment
   extraEnvConfigMaps: []
   # extraEnvConfigMaps:
@@ -65,7 +65,7 @@ common:
 
   ## @param common.extraEnvSecrets List of names of existing Secret containing extra env vars for all pods
   extraEnvSecrets: []
-  # extraEnvSecrets: 
+  # extraEnvSecrets:
   #   - common-secret-name
 
   ## @param common.podSecurityContext Set common pod's Security Context (Is rendered only if deployments and jobs podSecurityContext is empty) ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
@@ -105,7 +105,7 @@ application:
   #   preStop:
   #     exec:
   #       command: ["/bin/sh", "-c", "sleep 10"]
-  
+
   ## @param application.topologySpreadConstraints  list with constraints controlling how pods are spread across the cluster. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
   topologySpreadConstraints: []
   # topologySpreadConstraints:
@@ -118,41 +118,76 @@ application:
   ## @param application.nodeSelector Array with Node labels for application pods assignment. ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
   nodeSelector: {}
 
-  
+
   ## @param application.tolerations list with Tolerations for application pods assignment. ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
   tolerations: []
 
   ## @param application.affinity Array with Affinity for application pods assignment. ref: https://kubernetes.io/docs/tasks/configure-pod-container/assign-pods-nodes-using-node-affinity/#schedule-a-pod-using-required-node-affinity
   affinity: {}
 
-  job:
+  ## @param application.jobs List of Kubernetes Job definitions
+  jobs: []
+  # jobs:
+  #     ## @param application.jobs.nameSuffix Adds name suffix to job deployment
+  #   - nameSuffix: "migrate"
 
-    ## @param application.job.migrateCommand Providing enables migrating job
-    migrateCommand: ""
+  #     ## Object for configuration of helm hooks for migrating job (is configured only if application.command is not empty)
+  #     annotations:
+  #        ## @skip application.jobs.annotations.helm.sh/hook
+  #       "helm.sh/hook": post-upgrade, post-install
+  #        ## @skip application.jobs.annotations.helm.sh/hook-delete-policy
+  #       "helm.sh/hook-delete-policy": hook-succeeded
+  #        ## @skip application.jobs.annotations.helm.sh/hook-weight
+  #       "helm.sh/hook-weight": "0"
 
-    ## @param application.job.nameSuffix Adds name suffix to job deployment
-    nameSuffix: "migrate"
+  #     ## @param application.jobs.labels Array with labels to add to application deployment
+  #     labels: {}
 
-    ## Object for configuration of helm hooks for migrating job (is configured only if application.migrateCommand is not empty)
-    annotations:
-       ## @skip application.job.annotations.helm.sh/hook
-      "helm.sh/hook": post-upgrade, post-install
-       ## @skip application.job.annotations.helm.sh/hook-delete-policy
-      "helm.sh/hook-delete-policy": hook-succeeded
-       ## @skip application.job.annotations.helm.sh/hook-weight
-      "helm.sh/hook-weight": "0"
+  #     ## @param application.jobs.env Array with extra environment variables to add to main deployment
+  #     env: {}
+  #     # env:
+  #     #   key: value
 
+  #     ## @param application.jobs.extraEnvSecrets Name of existing Secret containing extra env vars for main deployment
+  #     extraEnvSecrets: []
+  #     # extraEnvSecrets:
+  #     #   - secret-name
 
-    ## @param application.job.restartPolicy Only a RestartPolicy equal to Never or OnFailure is allowed
-    restartPolicy: "Never"
+  #     ## @param application.jobs.command Override default container command (useful when using custom images)
+  #     command: []
+  #     # command:
+  #     #   - python
+  #     #   - link_shortener/core/run_migration.py
+
+  #     ## @param application.jobs.args Override default container args (useful when using custom images)
+  #     args: []
+
+  #     ## @param application.jobs.restartPolicy Only a RestartPolicy equal to Never or OnFailure is allowed
+  #     restartPolicy: "Never"
+
+  #     ## @param application.jobs.lifecycle Array with lifecycle definitions to add to job
+  #     lifecycle: {}
+  #     # lifecycle:
+  #     #   preStop:
+  #     #     exec:
+  #     #       command: ["/bin/sh", "-c", "sleep 10"]
+
+  #     ## @param application.jobs.volumes Optionally specify extra list of additional volumes for the job pod(s)
+  #     volumes: []
+
+  #     ## @param application.jobs.volumeMounts Optionally specify extra list of additional volumeMounts for the job container(s)
+  #     volumeMounts: []
 
   ## @param application.podAnnotations Annotations for application pods. ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   podAnnotations: {}
-  # podAnnotations: 
+  # podAnnotations:
   #   pod: "annotations"
   #   another: "annotation"
   #   common: "{{ .Values.commonAnnotations.common }}"
-  
+
+  ## @param application.containerPortEnabled Whether enable container port
+  containerPortEnabled: true
+
   ## @param application.containerPort Map container ports to host ports
   containerPort: 80
 
@@ -165,7 +200,7 @@ application:
   #   - name: https
   #     containerPort: 5001
   #     protocol: TCP
-  
+
   ## @param application.replicaCount Number of application replicas to deploy
   replicaCount: 1
 
@@ -225,20 +260,23 @@ application:
 
   ## @param application.args Override default container args (useful when using custom images)
   args: []
-  
+
   ## @param application.env Array with extra environment variables to add to main deployment
   env: {}
   # env:
   #   key: value
-  
+
+  ## @param application.terminationGracePeriodSeconds Kubernetes waits for a specified time called the termination grace period. By default, this is 30 seconds.
+  terminationGracePeriodSeconds: 30
+
   ## @param application.extraEnvConfigMaps Name of existing ConfigMap containing extra env vars for main deployment
   extraEnvConfigMaps: []
   # extraEnvConfigMaps:
   #   - configmap-name
-  
+
   ## @param application.extraEnvSecrets Name of existing Secret containing extra env vars for main deployment
   extraEnvSecrets: []
-  # extraEnvSecrets: 
+  # extraEnvSecrets:
   #   - secret-name
 
   ## @param application.volumes Optionally specify extra list of additional volumes for the application pod(s)
@@ -282,6 +320,31 @@ application:
   #   requests:
   #     cpu: 100m
   #     memory: 128Mi
+
+  ## @param application.persistentVolumes List of persistentVolumes and their definitions
+  persistentVolumes: []
+  # persistentVolumes:
+  #     ## @param application.persistentVolumes.name Specifies whether a persistentVolume should be created
+  #   - name: ""
+
+  #     ## @param application.persistentVolumes.accessModes accessModes of persistentVolume
+  #     accessModes:
+  #       - ReadWriteOnce
+
+  #     ## @param application.persistentVolumes.labels Array with labels to add to persistentVolume
+  #     labels: {}
+
+  #     ## @param application.persistentVolumes.annotations Array with annotations to add to persistentVolume
+  #     annotations: {}
+
+  #     ## @param application.persistentVolumes.size Size of persistentVolume
+  #     size: 10Gi
+
+  #     ## @param application.persistentVolumes.storageClass Persistent Volume Storage Class. If defined, storageClassName: <storageClass>. If set to "-", storageClassName: "", which disables dynamic provisioning. If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
+  #     storageClass: ""
+
+  #     ## @param application.persistentVolumes.volumeBindingMode https://kubernetes.io/docs/concepts/storage/storage-classes/#volume-binding-mode
+  #     volumeBindingMode: ""
 
 ## @section Cronjob parameters
 
@@ -329,15 +392,15 @@ cronjob:
   env: {}
   # env:
   #   key: value
-  
+
   ## @param cronjob.extraEnvConfigMaps Name of existing ConfigMap containing extra env vars for cronjob
   extraEnvConfigMaps: []
   # extraEnvConfigMaps:
   #   - configmap-name
-  
+
   ## @param cronjob.extraEnvSecrets Name of existing Secret containing extra env vars for cronjob
   extraEnvSecrets: []
-  # extraEnvSecrets: 
+  # extraEnvSecrets:
   #   - secret-name
 
   ## @param cronjob.restartPolicy Only a RestartPolicy equal to Never or OnFailure is allowed
@@ -358,7 +421,7 @@ cronjob:
   #     - all
   #   readOnlyRootFilesystem: false
   #   runAsNonRoot: true
-  
+
   ## @param cronjob.resources We usually recommend not to specify default resources and to leave this as a conscious choice for the user. This also increases chances charts run on environments with little resources, such as Minikube. If you do want to specify resources, uncomment the following lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   resources: {}
   # resources:
@@ -375,51 +438,69 @@ cronjob:
 ## @section External Secrets parameters
 ## secrets need to be also specified in `secretEnv` to be available for containers
 externalSecrets:
-## @param externalSecrets.enabled Specifies whether a automatic external secrets should be integrated
+  ## @param externalSecrets.enabled Specifies whether a automatic external secrets should be integrated
   enabled: false
 
-  ## @param externalSecrets.labels Array with labels to add to externalSecrets
-  labels: {}
+  ## @param externalSecrets.secrets List of objects used to fetch by External-Secrets operator
+  secrets: []
+  # secrets:
+  #     ## @param externalSecrets.name Name of external secret resource
+  #   - name: ""
 
-  ## @param externalSecrets.annotations Array with annotations to add to externalSecrets
-  annotations: {}
-  # annotations:
-  #   externalSecrets: annotation
+  #     ## @param externalSecrets.labels Array with labels to add to externalSecrets
+  #     labels: {}
 
-  ## @param externalSecrets.secretStoreKind String with kind of the SecretStore resource (SecretStore or ClusterSecretStore) Defaults to SecretStore
-  secretStoreKind:  "SecretStore"
-  
-  ## @param externalSecrets.secretStoreName SecretStore is created by Terraform with the name `$APP_NAME-$APP_ENVIRONMENT`
-  secretStoreName:  ## Empty will match SecretStore on the cluster
+  #     ## @param externalSecrets.annotations Array with annotations to add to externalSecrets
+  #     annotations: {}
+  #     # annotations:
+  #     #   externalSecrets: annotation
 
-  ## @param externalSecrets.targetSecretName String with name for the target secret
-  targetSecretName: ""
+  #     ## @param externalSecrets.secretStoreKind String with kind of the SecretStore resource (SecretStore or ClusterSecretStore) Defaults to SecretStore
+  #     secretStoreKind:  "SecretStore"
 
-  ## @param externalSecrets.creationPolicy String with definition of how the operator creates the a secret
-  creationPolicy: Owner
+  #     ## @param externalSecrets.secretStoreName SecretStore is created by Terraform with the name `$APP_NAME-$APP_ENVIRONMENT`
+  #     secretStoreName:  ## Empty will match SecretStore on the cluster
 
-  ## @param externalSecrets.variables list of variable names from GitLab to expose to the container
-  variables: []
-  
-  ## @param externalSecrets.extract list of variable names containing JSON objects that will be expanded to environment variables - each key inside the JSON object will correspond to a single environment variable
-  extract: []
+  #     ## @param externalSecrets.targetSecretName String with name for the target secret
+  #     targetSecretName: ""
 
-  ## @param externalSecrets.findRegex string used to find secrets based on regular expressions and rewrite the key names.
-  findRegex: ""
-  
-  ## @param externalSecrets.extraDataFrom List of objects used to fetch all properties from the Provider key
-  extraDataFrom: []
-  # extraDataFrom:
-  #   - extract:
-  #       key: database-credentials
-  #       version: v1
-  #       property: data
-  #       conversionStrategy: Default
-  #       decodingStrategy: Auto
-  #     rewrite:
-  #     - regexp:
-  #         source: "exp-(.*?)-ression"
-  #         target: "rewriting-${1}-with-groups"
+  #     ## @param externalSecrets.creationPolicy String with definition of how the operator creates the a secret
+  #     creationPolicy: Owner
+
+  #     ## @param externalSecrets.variables list of variable names from GitLab to expose to the container
+  #     variables: []
+
+  #     ## @param externalSecrets.template External Secrets template definition
+  #     template: {}
+
+  #     ## @param externalSecrets.refreshInterval Interval how often changes in secret will be updated
+  #     refreshInterval: 5m
+
+  #     ## @param externalSecrets.exposeToEnv Specifies whether the secret should be exposed as a container environment variable
+  #     exposeToEnv: true
+
+  #     ## @param externalSecrets.decodingStrategy Allows multiple decoding strategies during an object generation - (Auto, Base64, Base64URL, None - Default)
+  #     decodingStrategy: None
+
+  #     ## @param externalSecrets.extract list of variable names containing JSON objects that will be expanded to environment variables - each key inside the JSON object will correspond to a single environment variable
+  #     extract: []
+
+  #     ## @param externalSecrets.findRegex string used to find secrets based on regular expressions and rewrite the key names.
+  #     findRegex: ""
+
+  #     ## @param externalSecrets.extraDataFrom List of objects used to fetch all properties from the Provider key
+  #     extraDataFrom: []
+  #     # extraDataFrom:
+  #     #   - extract:
+  #     #       key: database-credentials
+  #     #       version: v1
+  #     #       property: data
+  #     #       conversionStrategy: Default
+  #     #       decodingStrategy: Auto
+  #     #     rewrite:
+  #     #     - regexp:
+  #     #         source: "exp-(.*?)-ression"
+  #     #         target: "rewriting-${1}-with-groups"
 
 ## @section Service Account parameters
 
@@ -474,7 +555,7 @@ service:
 
   ## @param service.type String which allows you to specify what kind of Service you want
   type: ClusterIP
-  
+
   ## @param service.port Intiger with incoming port
   port: 80
 
@@ -518,7 +599,6 @@ ingress:
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
-
 
 # -- Extra objects to deploy (value evaluated as a template)
 # -- In some cases, it can avoid the need for additional, extended or adhoc deployments.
@@ -596,7 +676,7 @@ keda:
 
   ## @param keda.enabled Specifies whether a KEDA ScaledObject should be created
   enabled: false
-  
+
   ## @param keda.labels Array with labels to add to all pods
   labels: {}
 
@@ -638,4 +718,4 @@ keda:
   #       topicName: sbtopic-app-service
   #       subscriptionName: sbsub-app-service
   #       namespace: servicebus-app-ns
-  #       messageCount: 50 # queue size treshold KEDA needs to hit to scale up/down 
+  #       messageCount: 50 # queue size treshold KEDA needs to hit to scale up/down

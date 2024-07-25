@@ -52,9 +52,14 @@ spec:
               {{- range .Values.common.extraEnvSecrets }}
               - secretRef:
                   name: {{ . }}{{- end }}
-              {{- if .Values.externalSecrets.enabled }}    
+              {{- if .Values.externalSecrets.enabled }}
+              {{- range .Values.externalSecrets.secrets }}
+              {{- if .exposeToEnv }}
               - secretRef:
-                  name: {{ include "application.externalSecrets.targetSecretName" . }}{{- end }}
+                  name: {{ .targetSecretName | quote }}
+              {{- end }}
+              {{- end }}
+              {{- end }}
             securityContext:  {{- .Values.cronjob.containerSecurityContext | default .Values.common.containerSecurityContext | toYaml | nindent 14 }}
         {{- with .Values.cronjob.sidecars }}
         {{- include "application.render" ( dict "value" . "context" $) | nindent 8 }}

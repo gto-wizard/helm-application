@@ -1,7 +1,7 @@
 include:
   project: applifting-cloud-engineering/cicd-templates
   ref: main
-  file: 
+  file:
     - GitVersion/Base.gitlab-ci.yml
 
 variables:
@@ -12,18 +12,21 @@ workflow:
   rules:
     - if: $CI_COMMIT_TAG
     - if: $CI_COMMIT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
 
 image:
   name: registry.gitlab.com/applifting-cloud-engineering/images/helm-kubectl:3.12.2-1.24.16
   entrypoint: ["/bin/sh", "-c"]
 
 stages:
+  - fetch-repositories
+  - render
+  - comment-mr
   - versioning
   - test
   - tag
   - package
   - release
-
 
 versioning:
   extends: .versioning
@@ -32,6 +35,9 @@ versioning:
 update-metadata:
   extends: .update-metadata
   stage: package
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
 
 lint:
   stage: package
@@ -73,6 +79,9 @@ release:
     - helm lint .
     - helm package . --version "$CHART_VERSION"
     - helm cm-push $HELM_CHART_NAME-*.*.*.tgz ${CI_PROJECT_NAME}
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
 
 .update-metadata:
   image:
@@ -117,3 +126,83 @@ release:
       else
         echo "No changes detected."
       fi
+
+fetch-repos:
+  stage: fetch-repositories
+  image:
+    name: alpine/git:2.43.0
+    entrypoint: [""]
+  script:
+    - mkdir ~/.ssh && ssh-keyscan -t rsa gitlab.com >> ~/.ssh/known_hosts
+    - git clone "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/gto-wizard/devops/helm-charts/application" "$CI_PROJECT_DIR/cicd-temp/application-base"
+    - git -C "$CI_PROJECT_DIR/cicd-temp/application-base" checkout "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+    - git clone "https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/gto-wizard/devops/k8s-resources" "$CI_PROJECT_DIR/cicd-temp/k8s-resources"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - templates/**
+        - values.yaml
+  artifacts:
+    expire_in: 10 min
+    paths:
+      - cicd-temp/application-base
+      - cicd-temp/k8s-resources
+
+.parallel-hidden-job:
+  parallel:
+    matrix:
+      - env: [dev, prod]
+
+render:
+  extends: .parallel-hidden-job
+  stage: render
+  # dependencies keyword to define a list of specific jobs to fetch artifacts from
+  # The specified jobs must all be in earlier stages:
+  dependencies:
+    - fetch-repos
+  image:
+    name: alpine/helm:3.15.1
+    entrypoint: ["/bin/sh", "-c"]
+  script:
+    - mkdir -p ./cicd-temp/diffs/$env
+    - ./scripts/render-charts.sh "$CI_PROJECT_DIR" "$CI_PROJECT_DIR/cicd-temp/k8s-resources" "$env" > ./cicd-temp/diffs/$env/head.txt
+    - ./scripts/render-charts.sh "$CI_PROJECT_DIR/cicd-temp/application-base" "$CI_PROJECT_DIR/cicd-temp/k8s-resources" "$env" > ./cicd-temp/diffs/$env/base.txt
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - templates/**
+        - values.yaml
+  artifacts:
+    expire_in: 10 min
+    paths:
+      - cicd-temp/diffs/$env/
+
+comment-mr:
+  extends: .parallel-hidden-job
+  image:
+    name: registry.gitlab.com/gitlab-org/cli:latest
+    entrypoint: [""]
+  stage: comment-mr
+  dependencies:
+    - render
+  # variables:
+  #   GITLAB_TOKEN: $GITLAB_MR_COMMENT_PA_TOKEN
+  script:
+    - BASE_MANIFESTS=$(cat "./cicd-temp/diffs/$env/base.txt")
+    - HEAD_MANIFESTS=$(cat "./cicd-temp/diffs/$env/head.txt")
+    - DIFF_EXIT_CODE=0
+    - DIFF_OUTPUT="$(diff -U 5 <(echo "$BASE_MANIFESTS") <(echo "$HEAD_MANIFESTS") 2>&1)" || DIFF_EXIT_CODE=$?
+    - echo $DIFF_EXIT_CODE
+    - if [[ $DIFF_EXIT_CODE -eq 0 ]]; then echo "Diff didn't find changes. Exiting.."; exit 0; fi
+    - if [[ $DIFF_EXIT_CODE -gt 1 ]]; then printf "ERROR:\n$DIFF_OUTPUT"; exit 1; fi
+    - GITLAB_DIFF_MR_COMMENT_CONTENT=$(./scripts/gitlab-diff-mr-comment-template.sh "$env" "$DIFF_OUTPUT")
+    - echo "$GITLAB_DIFF_MR_COMMENT_CONTENT"
+    # Project -> Settings -> Access Tokens, Create token with API scope. OR Profile -> Preferences -> Access Tokens, Create token with API scope
+    # Project -> Settings -> CI/CD -> Variables, Store as GITLAB_MR_COMMENT_PA_TOKEN
+    - export GITLAB_TOKEN=${GITLAB_MR_COMMENT_PA_TOKEN}
+    - glab mr --repo "$CI_PROJECT_PATH" note "$CI_MERGE_REQUEST_IID" --unique=true --message "$GITLAB_DIFF_MR_COMMENT_CONTENT"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - templates/**
+        - values.yaml

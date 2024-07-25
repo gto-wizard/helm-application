@@ -9,7 +9,7 @@
 | `imagePullSecrets[0].name` | List of secrets containing credentials to image registry | `regcred` |
 | `nameOverride`             | String to fully override application.name template       | `""`      |
 
-### Common parameters 
+### Common parameters
 
 | Name                               | Description                                                                                                                                                                                                                                              | Value |
 | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
@@ -37,10 +37,9 @@
 | `application.nodeSelector`                                  | Array with Node labels for application pods assignment. ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector                                                    | `{}`            |
 | `application.tolerations`                                   | list with Tolerations for application pods assignment. ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/                                                             | `[]`            |
 | `application.affinity`                                      | Array with Affinity for application pods assignment. ref: https://kubernetes.io/docs/tasks/configure-pod-container/assign-pods-nodes-using-node-affinity/#schedule-a-pod-using-required-node-affinity | `{}`            |
-| `application.job.migrateCommand`                            | Providing enables migrating job                                                                                                                                                                       | `""`            |
-| `application.job.nameSuffix`                                | Adds name suffix to job deployment                                                                                                                                                                    | `migrate`       |
-| `application.job.restartPolicy`                             | Only a RestartPolicy equal to Never or OnFailure is allowed                                                                                                                                           | `Never`         |
+| `application.jobs`                                          | List of Kubernetes Job definitions                                                                                                                                                                    | `[]`            |
 | `application.podAnnotations`                                | Annotations for application pods. ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/                                                                                 | `{}`            |
+| `application.containerPortEnabled`                          | Whether enable container port                                                                                                                                                                         | `true`          |
 | `application.containerPort`                                 | Map container ports to host ports                                                                                                                                                                     | `80`            |
 | `application.containerPortName`                             | Names the default container port                                                                                                                                                                      | `http`          |
 | `application.replicaCount`                                  | Number of application replicas to deploy                                                                                                                                                              | `1`             |
@@ -57,6 +56,7 @@
 | `application.command`                                       | Override default container command (useful when using custom images)                                                                                                                                  | `[]`            |
 | `application.args`                                          | Override default container args (useful when using custom images)                                                                                                                                     | `[]`            |
 | `application.env`                                           | Array with extra environment variables to add to main deployment                                                                                                                                      | `{}`            |
+| `application.terminationGracePeriodSeconds`                 | Kubernetes waits for a specified time called the termination grace period. By default, this is 30 seconds.                                                                                            | `30`            |
 | `application.extraEnvConfigMaps`                            | Name of existing ConfigMap containing extra env vars for main deployment                                                                                                                              | `[]`            |
 | `application.extraEnvSecrets`                               | Name of existing Secret containing extra env vars for main deployment                                                                                                                                 | `[]`            |
 | `application.volumes`                                       | Optionally specify extra list of additional volumes for the application pod(s)                                                                                                                        | `[]`            |
@@ -66,6 +66,7 @@
 | `application.readinessProbe`                                | customize readinessProbe on application pods                                                                                                                                                          | `{}`            |
 | `application.podSecurityContext`                            | Set application pod's Security Context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod                                            | `{}`            |
 | `application.containerSecurityContext`                      | Set Configure Container Security Context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container                                    | `{}`            |
+| `application.persistentVolumes`                             | List of persistentVolumes and their definitions                                                                                                                                                       | `[]`            |
 
 ### Cronjob parameters
 
@@ -90,19 +91,10 @@
 
 ### External Secrets parameters
 
-| Name                               | Description                                                                                                                                                                      | Value         |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| `externalSecrets.enabled`          | Specifies whether a automatic external secrets should be integrated                                                                                                              | `false`       |
-| `externalSecrets.labels`           | Array with labels to add to externalSecrets                                                                                                                                      | `{}`          |
-| `externalSecrets.annotations`      | Array with annotations to add to externalSecrets                                                                                                                                 | `{}`          |
-| `externalSecrets.secretStoreKind`  | String with kind of the SecretStore resource (SecretStore or ClusterSecretStore) Defaults to SecretStore                                                                         | `SecretStore` |
-| `externalSecrets.secretStoreName`  | SecretStore is created by Terraform with the name `$APP_NAME-$APP_ENVIRONMENT`                                                                                                   | `nil`         |
-| `externalSecrets.targetSecretName` | String with name for the target secret                                                                                                                                           | `""`          |
-| `externalSecrets.creationPolicy`   | String with definition of how the operator creates the a secret                                                                                                                  | `Owner`       |
-| `externalSecrets.variables`        | list of variable names from GitLab to expose to the container                                                                                                                    | `[]`          |
-| `externalSecrets.extract`          | list of variable names containing JSON objects that will be expanded to environment variables - each key inside the JSON object will correspond to a single environment variable | `[]`          |
-| `externalSecrets.findRegex`        | string used to find secrets based on regular expressions and rewrite the key names.                                                                                              | `""`          |
-| `externalSecrets.extraDataFrom`    | List of objects used to fetch all properties from the Provider key                                                                                                               | `[]`          |
+| Name                      | Description                                                         | Value   |
+| ------------------------- | ------------------------------------------------------------------- | ------- |
+| `externalSecrets.enabled` | Specifies whether a automatic external secrets should be integrated | `false` |
+| `externalSecrets.secrets` | List of objects used to fetch by External-Secrets operator          | `[]`    |
 
 ### Service Account parameters
 
