@@ -13,7 +13,9 @@ spec:
   {{- if and (not .Values.application.autoscaling.enabled) (not .Values.keda.enabled) }}
   replicas: {{ .Values.application.replicaCount }}
   {{- end }}
-  revisionHistoryLimit: {{ with .Values.application.revisionHistoryLimit }}{{ . }}{{- end }}
+  {{- if not (kindIs "invalid" .Values.application.revisionHistoryLimit) }}
+  revisionHistoryLimit: {{ .Values.application.revisionHistoryLimit }}
+  {{- end }}
   strategy: {{- toYaml .Values.application.updateStrategy | nindent 4 }}
   selector:
     matchLabels:
@@ -24,7 +26,9 @@ spec:
       labels:
         {{- include "application.selectorLabels.app" . | nindent 8 }}
     spec:
-      imagePullSecrets: {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets: {{- toYaml . | nindent 8}}
+      {{- end }}
       serviceAccountName: {{ include "application.serviceAccountName" . }}
       initContainers:
         {{- with .Values.application.initContainers }}
@@ -38,9 +42,11 @@ spec:
           command: {{- toYaml .Values.application.command | nindent 12 }}
           args: {{- toYaml .Values.application.args | nindent 12 }}
           ports:
+            {{- if .Values.application.containerPortEnabled }}
             - name: {{ .Values.application.containerPortName }}
               containerPort: {{ .Values.application.containerPort }}
               protocol: TCP
+            {{- end }}
             {{- with .Values.application.extraContainerPorts }}
             {{- include "application.render" ( dict "value" . "context" $) | nindent 12 }}
             {{- end }}
@@ -66,9 +72,14 @@ spec:
             {{- range .Values.common.extraEnvSecrets }}
             - secretRef:
                 name: {{ . }}{{- end }}
-            {{- if .Values.externalSecrets.enabled }}    
+            {{- if .Values.externalSecrets.enabled }}
+            {{- range .Values.externalSecrets.secrets }}
+            {{- if .exposeToEnv }}
             - secretRef:
-                name: {{ include "application.externalSecrets.targetSecretName" . }}{{- end }}
+                name: {{ .targetSecretName | quote }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
           {{- with .Values.application.startupProbe }}
           startupProbe: {{- toYaml . | nindent 12 }}{{- end }}
           {{- with .Values.application.livenessProbe }}
@@ -81,6 +92,7 @@ spec:
         {{- with .Values.application.sidecars }}
         {{- include "application.render" ( dict "value" . "context" $) | nindent 8 }}
         {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.application.terminationGracePeriodSeconds }}
       topologySpreadConstraints:  {{- .Values.application.topologySpreadConstraints | default .Values.common.topologySpreadConstraints | toYaml | nindent 8 }}
       nodeSelector:               {{- .Values.application.nodeSelector | default .Values.common.nodeSelector | toYaml | nindent 8 }}
       tolerations:                {{- .Values.application.tolerations | default .Values.common.tolerations | toYaml | nindent 8 }}
