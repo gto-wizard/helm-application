@@ -151,7 +151,7 @@ fetch-repos:
 .parallel-hidden-job:
   parallel:
     matrix:
-      - env: [dev, prod]
+      - env: [dev, prod, gtow-prod]
 
 render:
   extends: .parallel-hidden-job
