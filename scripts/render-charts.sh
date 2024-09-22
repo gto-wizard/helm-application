@@ -16,7 +16,7 @@ for VALUE_FILE in ${VALUE_FILES}; do
 done
 
 # search for all apps with matching env name
-APPSET_FOLDERS="$(find ./applications  -maxdepth 2 -type d \( -name "${GTO_ENV}" \)  ! -path "*/infrastructure/*" | sort)"
+APPSET_FOLDERS="$(find "${K8S_RESOURCES_DIR}/applications/" -maxdepth 2 -type d \( -name "${GTO_ENV}" \)  ! -path "*/infrastructure/*" | sort)"
 
 for APPSET_FOLDER in ${APPSET_FOLDERS}; do
   VALUE_FILES=$(find "${APPSET_FOLDER}" -maxdepth 1 -type f -name "*.yaml" ! -name "*.image.yaml")
