@@ -600,6 +600,39 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+## @section Ingresses parameters
+
+ingresses:
+  ## @param ingresses.enabled Specifies whether a ingresses should be created
+  enabled: false
+  paths:
+  - path: /
+    pathType: ImplementationSpecific
+  rules: []
+  # - annotations:
+  #     kubernetes.io/ingress.class: nginx
+  #   ingressClassName: nginx
+  #   hosts:
+  #   - host: chart-example.local
+  #     # overwrite default paths:
+  #     paths:
+  #     - path: /
+  #       pathType: ImplementationSpecific
+  #     # add additional paths
+  #     extraPaths: []
+  # -  nameSuffix: "haproxy"
+  #    ingressClassName: haproxy
+  #    hosts:
+  #    - host: chart-example.local
+  #      # overwrite default paths:
+  #      paths: []
+  #      # add additional paths
+  #      extraPaths: []
+  #    tls: []
+  #    - secretName: chart-example-tls
+  #      hosts:
+  #       - chart-example.local
+
 # -- Extra objects to deploy (value evaluated as a template)
 # -- In some cases, it can avoid the need for additional, extended or adhoc deployments.
 # -- See #595 for more details and traefik/tests/extra.yaml for example.
