@@ -4,10 +4,10 @@
 
 ### Global parameters
 
-| Name                       | Description                                              | Value     |
-| -------------------------- | -------------------------------------------------------- | --------- |
-| `imagePullSecrets[0].name` | List of secrets containing credentials to image registry | `regcred` |
-| `nameOverride`             | String to fully override application.name template       | `""`      |
+| Name               | Description                                              | Value |
+| ------------------ | -------------------------------------------------------- | ----- |
+| `imagePullSecrets` | List of secrets containing credentials to image registry | `nil` |
+| `nameOverride`     | String to fully override application.name template       | `""`  |
 
 ### Common parameters
 
