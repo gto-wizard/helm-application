@@ -605,9 +605,11 @@ ingress:
 ingresses:
   ## @param ingresses.enabled Specifies whether a ingresses should be created
   enabled: false
+  ## @skip ingresses.paths
   paths:
   - path: /
     pathType: ImplementationSpecific
+  ## @skip ingresses.rules
   rules: []
   # - annotations:
   #     kubernetes.io/ingress.class: nginx

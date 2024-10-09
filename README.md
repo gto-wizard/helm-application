@@ -135,6 +135,12 @@
 | `ingress.labels`      | Array with labels to add to ingresss          | `{}`    |
 | `ingress.annotations` | Array with annotations to add to ingresss     | `{}`    |
 
+### Ingresses parameters
+
+| Name                | Description                                     | Value   |
+| ------------------- | ----------------------------------------------- | ------- |
+| `ingresses.enabled` | Specifies whether a ingresses should be created | `false` |
+
 ### Service Monitor parameters
 
 | Name                           | Description                                           | Value      |
