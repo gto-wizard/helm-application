@@ -36,6 +36,8 @@ update-metadata:
   extends: .update-metadata
   stage: package
   rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
 
@@ -80,6 +82,8 @@ release:
     - helm package . --version "$CHART_VERSION"
     - helm cm-push $HELM_CHART_NAME-*.*.*.tgz ${CI_PROJECT_NAME}
   rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
 
