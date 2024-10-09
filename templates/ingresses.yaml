@@ -1,6 +1,6 @@
 {{- if and (.Values.ingresses.enabled) (not .Values.ingress.enabled) }}
 
-{{- $fullName := include "application.fullname" . -}}
+{{- $fullName := include "application.name" . -}}
 {{- $svcPort := .Values.service.port -}}
 {{- $paths := .Values.ingresses.paths -}}
 {{- range $ingress := .Values.ingresses.rules }}
@@ -11,6 +11,8 @@ kind: Ingress
 metadata:
   {{- if $ingress.nameSuffix }}
   name: {{ $fullName }}-{{ $ingress.nameSuffix }}
+  {{- else }}
+  name: {{ $fullName }}
   {{- end }}
   labels:
     {{- include "application.labels" $ | nindent 4 }}
@@ -19,7 +21,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  ingressClassName: {{ $ingress.className }}
+  ingressClassName: {{ $ingress.ingressClassName }}
   {{- if $ingress.tls }}
   tls:
     {{- range $ingress.tls }}
