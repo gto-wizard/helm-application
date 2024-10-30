@@ -40,6 +40,7 @@ update-metadata:
       when: on_success
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
+    - when: manual
 
 lint:
   stage: package
@@ -62,6 +63,8 @@ release:
   rules:
     - if: '$CI_COMMIT_BRANCH =~ /(dev|main)/'
       when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
     - when: manual
   before_script:
     - >
@@ -81,11 +84,6 @@ release:
     - helm lint .
     - helm package . --version "$CHART_VERSION"
     - helm cm-push $HELM_CHART_NAME-*.*.*.tgz ${CI_PROJECT_NAME}
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      when: on_success
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
 
 .update-metadata:
   image:
