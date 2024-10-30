@@ -26,6 +26,9 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- if .Values.common.labels }}
 {{ toYaml .Values.common.labels }}
 {{- end }}
+{{- if .Values.application.labels }}
+{{ toYaml .Values.application.labels }}
+{{- end }}
 {{- end }}
 
 {{/*

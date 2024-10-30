@@ -5,7 +5,6 @@ metadata:
   name: {{ include "application.name" . | quote }}
   labels:
     {{- include "application.labels" . | nindent 4 }}
-    {{- with .Values.application.labels }}{{- toYaml . | nindent 4 }}{{- end }}
   annotations:
     {{- with .Values.common.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
     {{- with .Values.application.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
