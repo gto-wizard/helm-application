@@ -5,7 +5,6 @@ metadata:
   name: {{ include "application.name" . }}
   labels:
     {{- include "application.labels" . | nindent 4 }}
-    {{- with .Values.application.labels }}{{- toYaml . | nindent 4 }}{{- end }}
   annotations:
     {{- with .Values.common.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
     {{- with .Values.application.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
@@ -25,6 +24,7 @@ spec:
       annotations: {{- toYaml .Values.application.podAnnotations | nindent 8 }}
       labels:
         {{- include "application.selectorLabels.app" . | nindent 8 }}
+        {{- include "application.labels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets: {{- toYaml . | nindent 8}}
