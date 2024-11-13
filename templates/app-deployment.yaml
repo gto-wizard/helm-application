@@ -1,0 +1,103 @@
+{{- if and .Values.application.enabled (eq .Values.application.kind "Deployment") -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "application.name" . }}
+  labels:
+    {{- include "application.labels" . | nindent 4 }}
+  annotations:
+    {{- with .Values.common.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
+    {{- with .Values.application.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
+spec:
+  {{- if and (not .Values.application.autoscaling.enabled) (not .Values.keda.enabled) }}
+  replicas: {{ .Values.application.replicaCount }}
+  {{- end }}
+  {{- if not (kindIs "invalid" .Values.application.revisionHistoryLimit) }}
+  revisionHistoryLimit: {{ .Values.application.revisionHistoryLimit }}
+  {{- end }}
+  strategy: {{- toYaml .Values.application.updateStrategy | nindent 4 }}
+  selector:
+    matchLabels:
+      {{- include "application.selectorLabels.app" . | nindent 6 }}
+  template:
+    metadata:
+      annotations: {{- toYaml .Values.application.podAnnotations | nindent 8 }}
+      labels:
+        {{- include "application.selectorLabels.app" . | nindent 8 }}
+        {{- include "application.labels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets: {{- toYaml . | nindent 8}}
+      {{- end }}
+      serviceAccountName: {{ include "application.serviceAccountName" . }}
+      initContainers:
+        {{- with .Values.application.initContainers }}
+        {{- include "application.render" (dict "value" . "context" $) | nindent 8 }}
+        {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ include "application.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          lifecycle: {{- toYaml .Values.application.lifecycle | nindent 12 }}
+          command: {{- toYaml .Values.application.command | nindent 12 }}
+          args: {{- toYaml .Values.application.args | nindent 12 }}
+          ports:
+            {{- if .Values.application.containerPortEnabled }}
+            - name: {{ .Values.application.containerPortName }}
+              containerPort: {{ .Values.application.containerPort }}
+              protocol: TCP
+            {{- end }}
+            {{- with .Values.application.extraContainerPorts }}
+            {{- include "application.render" ( dict "value" . "context" $) | nindent 12 }}
+            {{- end }}
+          resources: {{- toYaml .Values.application.resources | nindent 12 }}
+          env:
+            {{- range $key, $value := merge .Values.application.env .Values.common.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          envFrom:
+            {{- if .Values.configmap.enabled }}
+            - configMapRef:
+                name: {{ default (include "application.name" .) .Values.configmap.name }}{{- end }}
+            {{- range .Values.application.extraEnvConfigMaps }}
+            - configMapRef:
+                name: {{ . }}{{- end }}
+            {{- range .Values.common.extraEnvConfigMaps }}
+            - configMapRef:
+                name: {{ . }}{{- end }}
+            {{- range .Values.application.extraEnvSecrets }}
+            - secretRef:
+                name: {{ . }}{{- end }}
+            {{- range .Values.common.extraEnvSecrets }}
+            - secretRef:
+                name: {{ . }}{{- end }}
+            {{- if .Values.externalSecrets.enabled }}
+            {{- range .Values.externalSecrets.secrets }}
+            {{- if .exposeToEnv }}
+            - secretRef:
+                name: {{ .targetSecretName | quote }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+          {{- with .Values.application.startupProbe }}
+          startupProbe: {{- toYaml . | nindent 12 }}{{- end }}
+          {{- with .Values.application.livenessProbe }}
+          livenessProbe: {{- toYaml . | nindent 12 }}{{- end }}
+          {{- with .Values.application.readinessProbe }}
+          readinessProbe: {{- toYaml . | nindent 12 }}{{- end }}
+          {{- with .Values.application.volumeMounts }}
+          volumeMounts: {{- toYaml . | nindent 12 }}{{- end }}
+          securityContext:  {{- .Values.application.containerSecurityContext | default .Values.common.containerSecurityContext | toYaml | nindent 12 }}
+        {{- with .Values.application.sidecars }}
+        {{- include "application.render" ( dict "value" . "context" $) | nindent 8 }}
+        {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.application.terminationGracePeriodSeconds }}
+      topologySpreadConstraints:  {{- .Values.application.topologySpreadConstraints | default .Values.common.topologySpreadConstraints | toYaml | nindent 8 }}
+      nodeSelector:               {{- .Values.application.nodeSelector | default .Values.common.nodeSelector | toYaml | nindent 8 }}
+      tolerations:                {{- .Values.application.tolerations | default .Values.common.tolerations | toYaml | nindent 8 }}
+      affinity:                   {{- .Values.application.affinity | default .Values.common.affinity | toYaml | nindent 8 }}
+      securityContext:            {{- .Values.application.podSecurityContext | default .Values.common.podSecurityContext | toYaml | nindent 8 }}
+      volumes: {{- toYaml .Values.application.volumes | nindent 8 }}
+{{- end }}
+
