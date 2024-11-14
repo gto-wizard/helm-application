@@ -1,6 +1,6 @@
-{{- if .Values.application.enableDeployment -}}
+{{- if and .Values.application.enabled (eq .Values.application.kind "StatefulSet") -}}
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ include "application.name" . }}
   labels:
@@ -15,10 +15,10 @@ spec:
   {{- if not (kindIs "invalid" .Values.application.revisionHistoryLimit) }}
   revisionHistoryLimit: {{ .Values.application.revisionHistoryLimit }}
   {{- end }}
-  strategy: {{- toYaml .Values.application.updateStrategy | nindent 4 }}
   selector:
     matchLabels:
       {{- include "application.selectorLabels.app" . | nindent 6 }}
+  serviceName: {{ include "application.name" . }}
   template:
     metadata:
       annotations: {{- toYaml .Values.application.podAnnotations | nindent 8 }}
@@ -99,5 +99,18 @@ spec:
       affinity:                   {{- .Values.application.affinity | default .Values.common.affinity | toYaml | nindent 8 }}
       securityContext:            {{- .Values.application.podSecurityContext | default .Values.common.podSecurityContext | toYaml | nindent 8 }}
       volumes: {{- toYaml .Values.application.volumes | nindent 8 }}
+      {{- if .Values.application.persistence.enabled}}
+  volumeClaimTemplates:
+    {{- range .Values.persistence.volumeClaimTemplates }}
+    - metadata:
+        name: {{ .name }}
+      spec:
+        accessModes:  {{ .accessModes }}
+        storageClassName: {{ .storageClassName }}
+        resources:
+          requests:
+            storage: {{ .size }}
+    {{- end }}
+  {{- end }}
 {{- end }}
 
