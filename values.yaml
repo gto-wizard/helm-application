@@ -350,9 +350,9 @@ application:
 
   ## @param application.persistence for StatefulSets
   persistence:
-    ## @param application.persistence enable persistence
+    ## @param application.persistence.enabled enable persistence
     enabled: false
-    ## @skip persistence.volumeClaimTemplates
+    ## @skip application.persistence.volumeClaimTemplates
     volumeClaimTemplates:
       - name: data
         accessModes: ["ReadWriteOnce"]
