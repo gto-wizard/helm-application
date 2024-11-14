@@ -29,7 +29,8 @@
 
 | Name                                                        | Description                                                                                                                                                                                           | Value           |
 | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| `application.enableDeployment`                              | Specifies whether a application deployment should be created                                                                                                                                          | `true`          |
+| `application.enabled`                                       | Specifies whether application should be created                                                                                                                                                       | `true`          |
+| `application.kind`                                          | Specifies whether application Deployment or StatefulSet should be created                                                                                                                             | `Deployment`    |
 | `application.labels`                                        | Array with labels to add to application deployment                                                                                                                                                    | `{}`            |
 | `application.annotations`                                   | Array with annotations to add to application deployment                                                                                                                                               | `{}`            |
 | `application.lifecycle`                                     | Array with lifecycle definitions to add to application deployment                                                                                                                                     | `{}`            |
@@ -67,6 +68,7 @@
 | `application.podSecurityContext`                            | Set application pod's Security Context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod                                            | `{}`            |
 | `application.containerSecurityContext`                      | Set Configure Container Security Context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container                                    | `{}`            |
 | `application.persistentVolumes`                             | List of persistentVolumes and their definitions                                                                                                                                                       | `[]`            |
+| `application.persistence.enabled`                           | enable persistence                                                                                                                                                                                    | `false`         |
 
 ### Cronjob parameters
 
