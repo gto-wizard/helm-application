@@ -88,8 +88,10 @@ common:
 ## @section Application parameters
 
 application:
-  ## @param application.enableDeployment Specifies whether a application deployment should be created
-  enableDeployment: true
+  ## @param application.enabled Specifies whether application should be created
+  enabled: true
+  ## @param application.kind Specifies whether application Deployment or StatefulSet should be created
+  kind: Deployment
 
   ## @param application.labels Array with labels to add to application deployment
   labels: {}
@@ -345,6 +347,17 @@ application:
 
   #     ## @param application.persistentVolumes.volumeBindingMode https://kubernetes.io/docs/concepts/storage/storage-classes/#volume-binding-mode
   #     volumeBindingMode: ""
+
+  ## @param application.persistence for StatefulSets
+  persistence:
+    ## @param application.persistence enable persistence
+    enabled: false
+    ## @skip persistence.volumeClaimTemplates
+    volumeClaimTemplates:
+      - name: data
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: "standard"
+        size: 1Gi
 
 ## @section Cronjob parameters
 
