@@ -89,6 +89,7 @@ spec:
           {{- with .Values.application.volumeMounts }}
           volumeMounts: {{- toYaml . | nindent 12 }}{{- end }}
           securityContext:  {{- .Values.application.containerSecurityContext | default .Values.common.containerSecurityContext | toYaml | nindent 12 }}
+          dnsConfig: {{- .Values.application.dnsConfig | default .Values.common.dnsConfig | toYaml | nindent 12 }}
         {{- with .Values.application.sidecars }}
         {{- include "application.render" ( dict "value" . "context" $) | nindent 8 }}
         {{- end }}
