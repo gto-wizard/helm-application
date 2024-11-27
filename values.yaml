@@ -84,6 +84,11 @@ common:
   #   readOnlyRootFilesystem: false
   #   runAsNonRoot: true
 
+  ## @skip common.dnsConfig Set Dns config options. ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  dnsConfig:
+    options:
+    - name: ndots
+      value: '1'
 
 ## @section Application parameters
 
@@ -312,6 +317,12 @@ application:
   #   readOnlyRootFilesystem: false
   #   runAsNonRoot: true
 
+  ## @skip application.dnsConfig Set Dns config options. ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  dnsConfig:
+    options:
+    - name: ndots
+      value: '1'
+
   ## @skip application.resources
   ## We usually recommend not to specify default resources and to leave this as a conscious choice for the user. This also increases chances charts run on environments with little resources, such as Minikube. If you do want to specify resources, uncomment the following lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   resources: {}
@@ -348,11 +359,10 @@ application:
   #     ## @param application.persistentVolumes.volumeBindingMode https://kubernetes.io/docs/concepts/storage/storage-classes/#volume-binding-mode
   #     volumeBindingMode: ""
 
-  ## @param application.persistence for StatefulSets
   persistence:
-    ## @param application.persistence enable persistence
+    ## @param application.persistence.enabled enable persistence
     enabled: false
-    ## @skip persistence.volumeClaimTemplates
+    ## @skip application.persistence.volumeClaimTemplates
     volumeClaimTemplates:
       - name: data
         accessModes: ["ReadWriteOnce"]
