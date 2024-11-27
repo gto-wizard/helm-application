@@ -89,10 +89,10 @@ spec:
           {{- with .Values.application.volumeMounts }}
           volumeMounts: {{- toYaml . | nindent 12 }}{{- end }}
           securityContext:  {{- .Values.application.containerSecurityContext | default .Values.common.containerSecurityContext | toYaml | nindent 12 }}
-          dnsConfig: {{- .Values.application.dnsConfig | default .Values.common.dnsConfig | toYaml | nindent 12 }}
         {{- with .Values.application.sidecars }}
         {{- include "application.render" ( dict "value" . "context" $) | nindent 8 }}
         {{- end }}
+      dnsConfig: {{- .Values.application.dnsConfig | default .Values.common.dnsConfig | toYaml | nindent 8 }}
       terminationGracePeriodSeconds: {{ .Values.application.terminationGracePeriodSeconds }}
       topologySpreadConstraints:  {{- .Values.application.topologySpreadConstraints | default .Values.common.topologySpreadConstraints | toYaml | nindent 8 }}
       nodeSelector:               {{- .Values.application.nodeSelector | default .Values.common.nodeSelector | toYaml | nindent 8 }}
