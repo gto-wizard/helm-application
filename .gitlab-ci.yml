@@ -48,13 +48,24 @@ lint:
     - helm lint .
 
 tag:
-  extends: .tag
+  dependencies:
+    - versioning
   stage: release
+  image: curlimages/curl:8.11.0
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: on_success
     - when: never
   needs: ["versioning", "update-metadata", "lint"]
+  script:
+    # CICD_TOKEN should be provided via the project settings. The value should be an access token with API scope
+    # https://docs.gitlab.com/ee/api/tags.html#create-a-new-tag
+    - echo "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags?tag_name=${TAG_NAME}&ref=${CI_COMMIT_BRANCH}"
+    - |
+      curl --fail-with-body \
+        --request POST \
+        --header "PRIVATE-TOKEN: ${CICD_TOKEN}" \
+        "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags?tag_name=${TAG_NAME}&ref=${CI_COMMIT_BRANCH}"
 
 release:
   stage: release
