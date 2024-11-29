@@ -1,12 +1,8 @@
-include:
-  project: applifting-cloud-engineering/cicd-templates
-  ref: main
-  file:
-    - GitVersion/Base.gitlab-ci.yml
-
 variables:
   HELM_CHART_NAME: "application"
   HELM_CHART_PATH: "."
+  JSON_KEYS: SemVer # keys to be parsed from gitversion.json
+  TAG_NAME: ${SEMVER} # The tag used for naming module - JSON_KEYS need to be capitalized
 
 workflow:
   rules:
@@ -47,43 +43,24 @@ lint:
   script:
     - helm lint .
 
-tag:
-  extends: .tag
-  stage: release
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      when: on_success
-    - when: never
-  needs: ["versioning", "update-metadata", "lint"]
-
-release:
-  stage: release
-  needs: ["versioning", "update-metadata", "lint"]
-  dependencies: ["versioning"]
-  rules:
-    - if: '$CI_COMMIT_BRANCH =~ /(dev|main)/'
-      when: on_success
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never
-    - when: manual
-  before_script:
-    - >
-      if [[ "${TAG_NAME}" == "" ]]; then
-        export CHART_VERSION=$CI_COMMIT_TAG
-      else
-        export CHART_VERSION=${TAG_NAME}
-      fi
-    - apk update
-    - apk add nodejs npm
-    - npm install -g @bitnami/readme-generator-for-helm
-    - cd ${HELM_CHART_PATH}
+.versioning:
+  stage: versioning
+  image:
+    name: gittools/gitversion:5.12.0
+    entrypoint: [""]
   script:
-    - sed -e "s|CHART_PROJECT_URL|$CI_PROJECT_URL|g" -e "s|CHART_VERSION|$CHART_VERSION|g" Chart.yaml.tpl > Chart.yaml
-    - readme-generator --values "values.yaml" --readme "README.md"
-    - helm repo add --username gitlab-ci-token --password ${CI_JOB_TOKEN} ${CI_PROJECT_NAME} ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/stable
-    - helm lint .
-    - helm package . --version "$CHART_VERSION"
-    - helm cm-push $HELM_CHART_NAME-*.*.*.tgz ${CI_PROJECT_NAME}
+    - apt-get update
+    - apt-get install jq -y
+    - /tools/dotnet-gitversion /url $CI_REPOSITORY_URL /u gitlab-ci-token /p $CI_JOB_TOKEN /b $CI_COMMIT_REF_NAME /c $CI_COMMIT_SHA /dynamicRepoLocation $CI_PROJECT_DIR $VERBOSITYSETTING | tee gitversion.json
+    - |
+      for key in $JSON_KEYS; do
+          value=$(jq -r ".${key}" gitversion.json | tr '+' '-')
+          echo "${key^^}=$value" >> version.env
+      done
+    - cat version.env
+  artifacts:
+    reports:
+      dotenv: version.env
 
 .update-metadata:
   image:
@@ -96,6 +73,8 @@ release:
       gitlab.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCsj2bNKTBSpIYDEGk9KxsGh3mySTRgMtXL583qmBpzeQ+jqCMRgBqB98u3z++J1sKlXHWfM9dyhSevkMwSbhoR8XIq/U0tCNyokEi/ueaBMCvbcTHhO7FcwzY92WK4Yt0aGROY5qX2UKSeOvuP4D6TPqKF1onrSzH9bx9XUf2lEdWT/ia1NEKjunUqu1xOB/StKDHMoX4/OKyIzuS0q/T1zOATthvasJFoPrAjkohTyaDUz2LN5JoH839hViyEG82yB+MjcFV5MU3N1l1QL3cVUCh93xSaua1N85qivl+siMkPGbO5xR/En4iEY6K2XPASUEMaieWVNTRCtJ4S8H+9
       gitlab.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFSMqzJeV9rUzU4kWitGjeR4PWSa29SPqJ1fVkhtj3Hw9xjLVXVYrU9QlYWrOLXBpQ6KWjbjTDTdDkoohFzgbEY=
   before_script:
+    - echo TAG_NAME="${TAG_NAME}"
+    - echo CI_COMMIT_TAG="${CI_COMMIT_TAG}"
     - >
       if [[ "${TAG_NAME}" == "" ]]; then
         export CHART_VERSION=$CI_COMMIT_TAG
@@ -128,6 +107,57 @@ release:
       else
         echo "No changes detected."
       fi
+
+tag:
+  dependencies:
+    - versioning
+  stage: release
+  image: curlimages/curl:8.11.0
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
+    - when: never
+  needs: ["versioning", "update-metadata", "lint"]
+  script:
+    # CICD_TOKEN should be provided via the project settings. The value should be an access token with API scope
+    # https://docs.gitlab.com/ee/api/tags.html#create-a-new-tag
+    - echo "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags?tag_name=${TAG_NAME}&ref=${CI_COMMIT_BRANCH}"
+    - |
+      curl --fail-with-body \
+        --request POST \
+        --header "PRIVATE-TOKEN: ${CICD_TOKEN_PAT}" \
+        "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/repository/tags?tag_name=${TAG_NAME}&ref=${CI_COMMIT_BRANCH}"
+
+release:
+  stage: release
+  needs: ["versioning", "update-metadata", "lint"]
+  dependencies: ["versioning"]
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /(dev|main)/'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - when: manual
+  before_script:
+    - echo TAG_NAME="${TAG_NAME}"
+    - echo CI_COMMIT_TAG="${CI_COMMIT_TAG}"
+    - >
+      if [[ "${TAG_NAME}" == "" ]]; then
+        export CHART_VERSION=$CI_COMMIT_TAG
+      else
+        export CHART_VERSION=${TAG_NAME}
+      fi
+    - apk update
+    - apk add nodejs npm
+    - npm install -g @bitnami/readme-generator-for-helm
+    - cd ${HELM_CHART_PATH}
+  script:
+    - sed -e "s|CHART_PROJECT_URL|$CI_PROJECT_URL|g" -e "s|CHART_VERSION|$CHART_VERSION|g" Chart.yaml.tpl > Chart.yaml
+    - readme-generator --values "values.yaml" --readme "README.md"
+    - helm repo add --username gitlab-ci-token --password ${CI_JOB_TOKEN} ${CI_PROJECT_NAME} ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/stable
+    - helm lint .
+    - helm package . --version "$CHART_VERSION"
+    - helm cm-push $HELM_CHART_NAME-*.*.*.tgz ${CI_PROJECT_NAME}
 
 fetch-repos:
   stage: fetch-repositories
