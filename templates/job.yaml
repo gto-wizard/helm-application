@@ -68,9 +68,10 @@ spec:
         volumeMounts: {{- toYaml . | nindent 10 }}{{- end }}
         securityContext: {{- $.Values.application.containerSecurityContext | default $.Values.common.containerSecurityContext | toYaml | nindent 10 }}
       nodeSelector:      {{- $.Values.application.nodeSelector | default $.Values.common.nodeSelector | toYaml | nindent 8 }}
-      tolerations:      {{- $.Values.application.tolerations | default $.Values.common.tolerations | toYaml | nindent 8 }}
-      affinity:         {{- $.Values.application.affinity | default $.Values.common.affinity | toYaml | nindent 8 }}
-      securityContext:  {{- $.Values.application.podSecurityContext | default $.Values.common.podSecurityContext | toYaml | nindent 8 }}
+      tolerations:       {{- $.Values.application.tolerations | default $.Values.common.tolerations | toYaml | nindent 8 }}
+      affinity:          {{- $.Values.application.affinity | default $.Values.common.affinity | toYaml | nindent 8 }}
+      securityContext:   {{- $.Values.application.podSecurityContext | default $.Values.common.podSecurityContext | toYaml | nindent 8 }}
+      priorityClassName: {{ $.Values.application.priorityClassName | default $.Values.common.priorityClassName | quote }}
       volumes:
         {{- with $.Values.application.volumes }}{{- toYaml . | nindent 8 }}{{- end }}
         {{- with .volumes }}{{- toYaml . | nindent 8 }}{{- end }}
