@@ -99,5 +99,6 @@ spec:
       tolerations:                {{- .Values.application.tolerations | default .Values.common.tolerations | toYaml | nindent 8 }}
       affinity:                   {{- .Values.application.affinity | default .Values.common.affinity | toYaml | nindent 8 }}
       securityContext:            {{- .Values.application.podSecurityContext | default .Values.common.podSecurityContext | toYaml | nindent 8 }}
+      priorityClassName: {{ .Values.application.priorityClassName | default .Values.common.priorityClassName | quote }}
       volumes: {{- toYaml .Values.application.volumes | nindent 8 }}
 {{- end }}
