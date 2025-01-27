@@ -50,6 +50,7 @@ common:
   ## @param common.tolerations List with Tolerations for all pods assignment is rendered only if deployments and jobs tolerations is empty ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
   tolerations: []
 
+
   ## @param common.affinity Array with Affinity for all pods assignment is rendered only if deployments and jobs affinity is empty. ref: https://kubernetes.io/docs/tasks/configure-pod-container/assign-pods-nodes-using-node-affinity/#schedule-a-pod-using-required-node-affinity
   affinity: {}
 
@@ -72,6 +73,9 @@ common:
   podSecurityContext: {}
   # podSecurityContext:
   #   fsGroup: 1001
+
+  ## @param common.priorityClassName String priorityClassName to add to all Pod: https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority/
+  priorityClassName: ""
 
   ## @param common.containerSecurityContext Configure Container Security Context (is rendered only if deployments and jobs containerSecurityContext is empty) ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   containerSecurityContext: {}
@@ -305,6 +309,9 @@ application:
   podSecurityContext: {}
   # podSecurityContext:
   #   fsGroup: 1001
+
+  ## @param application.priorityClassName String priorityClassName to add to application Pod: https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#pod-priority/
+  priorityClassName: ""
 
   ## @param application.containerSecurityContext Set Configure Container Security Context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   containerSecurityContext: {}
