@@ -59,6 +59,13 @@ common:
   # env:
   #   key: value
 
+  ## @param common.extraEnv Array with extra environment variables to add to all pods as YAML
+  extraEnv: []
+    # - name: POD_IP
+    #   valueFrom:
+    #     fieldRef:
+    #       fieldPath: status.podIP
+
   ## @param common.extraEnvConfigMaps Name of existing ConfigMap containing extra env vars for main deployment
   extraEnvConfigMaps: []
   # extraEnvConfigMaps:
@@ -277,6 +284,13 @@ application:
   # env:
   #   key: value
 
+  ## @param application.extraEnv Array with extra environment variables to add to all pods as YAML
+  extraEnv: []
+    # - name: POD_IP
+    #   valueFrom:
+    #     fieldRef:
+    #       fieldPath: status.podIP
+
   ## @param application.terminationGracePeriodSeconds Kubernetes waits for a specified time called the termination grace period. By default, this is 30 seconds.
   terminationGracePeriodSeconds: 30
 
@@ -422,6 +436,13 @@ cronjob:
   env: {}
   # env:
   #   key: value
+
+  ## @param cronjob.extraEnv Array with extra environment variables to add to all pods as YAML
+  extraEnv: []
+    # - name: POD_IP
+    #   valueFrom:
+    #     fieldRef:
+    #       fieldPath: status.podIP
 
   ## @param cronjob.extraEnvConfigMaps Name of existing ConfigMap containing extra env vars for cronjob
   extraEnvConfigMaps: []
