@@ -81,3 +81,31 @@ Usage:
 {{- else if .Values.image.shasum }}@{{ .Values.image.shasum }}
 {{- else if .Values.image.tag }}:{{ .Values.image.tag }}{{- end }}
 {{- end -}}
+
+{{/*
+Renders extra environment variables from application and common values as YAML.
+Usage:
+{{- include "application.extraEnv" . }}
+*/}}
+{{- define "application.extraEnv" -}}
+{{- with .Values.application.extraEnv }}
+{{- toYaml . | nindent 12 }}
+{{- end }}
+{{- with .Values.common.extraEnv }}
+{{- toYaml . | nindent 12 }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Renders extra environment variables from cronjob and common values as YAML.
+Usage:
+{{- include "cronjob.extraEnv" . }}
+*/}}
+{{- define "cronjob.extraEnv" -}}
+{{- with .Values.cronjob.extraEnv }}
+{{- toYaml . | nindent 14 }}
+{{- end }}
+{{- with .Values.common.extraEnv }}
+{{- toYaml . | nindent 14 }}
+{{- end }}
+{{- end -}}
