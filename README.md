@@ -18,7 +18,7 @@ version: 8
 dependencies:
   - name: application
     version: 8
-    repository: "ghcr.io/gto-wizard/helm-application/charts"
+    repository: "oci://ghcr.io/gto-wizard/helm-application/charts"
 ```
 ### cli example:
 ``` bash
