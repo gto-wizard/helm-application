@@ -37,7 +37,15 @@ spec:
           - name: {{ $key }}
             value: {{ $value | quote }}
           {{- end }}
-            {{- include "application.extraEnv" . }}
+          {{- with $.Values.application.extraEnv }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+          {{- with $.Values.common.extraEnv }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+          {{- with .extraEnv }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
         envFrom:
           {{- if $.Values.configmap.enabled }}
           - configMapRef:
