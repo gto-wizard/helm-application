@@ -1,4 +1,30 @@
-# application
+# GTO Wizard Application Helm Chart
+
+## Usage
+
+### Chart.yaml example:
+``` yaml
+apiVersion: v2
+name: application
+
+description: Universal Helm chart used for deployment of GTO Wizard services
+
+type: application
+sources:
+  - https://github.com/gto-wizard/helm-application
+
+version: 8
+
+dependencies:
+  - name: application
+    version: 8
+    repository: "oci://ghcr.io/gto-wizard/helm-application/charts"
+```
+### cli example:
+``` bash
+helm registry login ghcr.io/gto-wizard/helm-application/charts
+helm pull application ghcr.io/gto-wizard/helm-application/charts/application --version 1
+```
 
 ## Parameters
 
