@@ -1,0 +1,66 @@
+name: Update chart metadata
+
+on:
+  pull_request:
+    paths-ignore:
+      - '.github/**'
+
+jobs:
+  metadata:
+    # depending on default permission settings for your org (contents being read-only or read-write for workloads), you will have to add permissions
+    # see: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#modifying-the-permissions-for-the-github_token
+    permissions:
+      # write permission is required to create a github release
+      contents: write
+      # write permission is required for autolabeler
+      # otherwise, read permission is required at least
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine Version
+        uses: release-drafter/release-drafter@v6.1.0
+        id: determine_version
+        with:
+          publish: false
+          commitish: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update chart metadata
+        id: chart_metadata
+        env:
+          CHART_VERSION: ${{ steps.determine_version.outputs.major_version }}
+        run: |
+          sed -i "s|^version:.*|version: \"${{ env.CHART_VERSION }}\"|" Chart.yaml
+
+      - name: Generate Helm README
+        id: generate_helm_readme
+        run: |
+          npm install -g @bitnami/readme-generator-for-helm
+          readme-generator --values "values.yaml" --readme "README.md"
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          echo "changes=$(if git diff --quiet; then echo false; else echo true; fi)" >> $GITHUB_OUTPUT
+
+      - name: Commit files if changed
+        if: steps.check_changes.outputs.changes == 'true'
+        run: |
+          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git config --local user.name "$GITHUB_ACTOR"
+          git commit -a -m "Update chart metadata"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        if: steps.check_changes.outputs.changes == 'true'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.head_ref }}
+
+
