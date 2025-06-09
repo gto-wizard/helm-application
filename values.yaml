@@ -6,22 +6,21 @@
 
 ## @skip image
 image:
+  ## @param image.repository The container image repository (e.g. nginx, myrepo/app) used for all workloads
   repository: ""
+  ## @param image.pullPolicy Image pull policy for the container (Allowed values: Always, IfNotPresent)
   pullPolicy: IfNotPresent
+  ## @param image.tag The image tag to use (ignored if overrideTag or shasum is set)
   tag: ""
+  ## @param image.shasum The image digest (SHA256) to use instead of a tag (takes precedence over tag, but ignored if overrideTag is set)
   shasum: ""
+  ## @param image.overrideTag If set, this tag overrides image.tag and image.shasum for all workloads (takes precedence over both tag and shasum)
   overrideTag: ""
-
-## @param imagePullSecrets List of secrets containing credentials to image registry
-imagePullSecrets:
-  # - name: regcred
-
-
-## @param nameOverride String to fully override application.name template
-nameOverride: ""
+  ## @param image.pullSecrets List of secrets containing credentials to image registry
+  pullSecrets: []
+    # - name: regcred
 
 ## @section Common parameters
-
 ## settings and values to add to all deployed objects
 
 common:
