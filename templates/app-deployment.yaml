@@ -18,12 +18,12 @@ spec:
   strategy: {{- toYaml .Values.application.updateStrategy | nindent 4 }}
   selector:
     matchLabels:
-      {{- include "application.selectorLabels.app" . | nindent 6 }}
+      {{- include "application.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       annotations: {{- toYaml .Values.application.podAnnotations | nindent 8 }}
       labels:
-        {{- include "application.selectorLabels.app" . | nindent 8 }}
+        {{- include "application.selectorLabels" . | nindent 8 }}
         {{- include "application.labels" . | nindent 8 }}
     spec:
       {{- with .Values.image.pullSecrets }}

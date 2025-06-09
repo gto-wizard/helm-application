@@ -22,11 +22,19 @@ image:
 
 ## @section Common parameters
 ## settings and values to add to all deployed objects
-
 common:
 
-  ## @param common.labels Array with labels to add to all pods
-  labels: {}
+  ## @param common.nameOverride String to fully override application.name template for all resources
+  nameOverride: ""
+
+  ## @param common.labels Labels to add to all resources created by the chart
+  labels:
+    component: ""
+    partOf: ""
+    managedBy: "ArgoCD"
+
+  ## @param common.extraLabels Array with labels to add to all pods
+  extraLabels: {}
 
   ## @param common.annotations Array with annotations to add to all pods
   annotations: {}
