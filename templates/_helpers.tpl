@@ -3,47 +3,35 @@
 Expand the name of the chart.
 */}}
 {{- define "application.name" -}}
-{{- default .Release.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- default .Release.Name .Values.common.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
-Create chart name and version as used by the chart label.
-*/}}
-{{- define "application.chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
-{{- end }}
-
-{{/*
-Common labels
+Generate recommended Kubernetes labels for a component.
+Usage:
+{{ include "application.labels" . }}
 */}}
 {{- define "application.labels" -}}
-helm.sh/chart: {{ include "application.chart" . }}
-{{ include "application.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- if .Values.common.labels }}
-{{ toYaml .Values.common.labels }}
+app.kubernetes.io/name: {{ include "application.name" . }}
+app.kubernetes.io/version: {{ .Values.image.overrideTag | default .Values.image.shasum | default .Values.image.tag }}
+app.kubernetes.io/component: {{ required "common.labels.component is required" .Values.common.labels.component }}
+app.kubernetes.io/part-of: {{ required "common.labels.partOf is required" .Values.common.labels.partOf }}
+app.kubernetes.io/managed-by: {{ .Values.common.labels.managedBy | default .Release.Service }}
+helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- if .Values.common.extraLabels }}
+{{ toYaml .Values.common.extraLabels }}
 {{- end }}
 {{- if .Values.application.labels }}
 {{ toYaml .Values.application.labels }}
 {{- end }}
 {{- end }}
 
+
 {{/*
 Selector labels
 */}}
 {{- define "application.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "application.name" . }}
-{{- end }}
-
-{{/*
-Selector labels for application deployment
-*/}}
-{{- define "application.selectorLabels.app" -}}
-{{- include "application.selectorLabels" . }}
-component: app
+selector-label: app
 {{- end }}
 
 {{/*
