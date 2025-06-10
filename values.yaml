@@ -2,6 +2,10 @@
 # -- This is a YAML-formatted file.
 # -- Declare variables to be passed into your templates.
 
+
+## @param nameOverride String to fully override application.name template for all resources
+nameOverride: ""
+
 ## @section Image parameters
 ## image onfiguration options for the container image used by all workloads.
 image:
@@ -22,9 +26,6 @@ image:
 ## @section Common parameters
 ## settings and values to add to all deployed objects
 common:
-
-  ## @param common.nameOverride String to fully override application.name template for all resources
-  nameOverride: ""
 
   ## Labels to add to all resources created by the chart
   labels:
