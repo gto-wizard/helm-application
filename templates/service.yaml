@@ -20,5 +20,5 @@ spec:
     {{- include "application.render" ( dict "value" . "context" $) | nindent 4 }}
     {{- end }}
   selector:
-    {{- include "application.selectorLabels.app" . | nindent 4 }}
+    {{- include "application.selectorLabels" . | nindent 4 }}
 {{- end }}

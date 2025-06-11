@@ -2,32 +2,42 @@
 # -- This is a YAML-formatted file.
 # -- Declare variables to be passed into your templates.
 
-## @section Global parameters
 
-## @skip image
-image:
-  repository: ""
-  pullPolicy: IfNotPresent
-  tag: ""
-  shasum: ""
-  overrideTag: ""
-
-## @param imagePullSecrets List of secrets containing credentials to image registry
-imagePullSecrets:
-  # - name: regcred
-
-
-## @param nameOverride String to fully override application.name template
+## @param nameOverride String to fully override application.name template for all resources
 nameOverride: ""
 
+## @section Image parameters
+## image onfiguration options for the container image used by all workloads.
+image:
+  ## @param image.repository The container image repository (e.g. nginx, myrepo/app) used for all workloads
+  repository: ""
+  ## @param image.pullPolicy Image pull policy for the container (Allowed values: Always, IfNotPresent)
+  pullPolicy: IfNotPresent
+  ## @param image.tag The image tag to use (ignored if overrideTag or shasum is set)
+  tag: ""
+  ## @param image.shasum The image digest (SHA256) to use instead of a tag (takes precedence over tag, but ignored if overrideTag is set)
+  shasum: ""
+  ## @param image.overrideTag If set, this tag overrides image.tag and image.shasum for all workloads (takes precedence over both tag and shasum)
+  overrideTag: ""
+  ## @param image.pullSecrets List of secrets containing credentials to image registry
+  pullSecrets: []
+    # - name: regcred
+
 ## @section Common parameters
-
 ## settings and values to add to all deployed objects
-
 common:
 
-  ## @param common.labels Array with labels to add to all pods
-  labels: {}
+  ## Labels to add to all resources created by the chart
+  labels:
+    ## @param common.labels.component Component label to identify the application component
+    component: ""
+    ## @param common.labels.partOf Part-of label to group related resources
+    partOf: ""
+    ## @param common.labels.managedBy Managed-by label to specify the tool managing the resource
+    managedBy: ""
+
+  ## @param common.extraLabels Array with labels to add to all pods
+  extraLabels: {}
 
   ## @param common.annotations Array with annotations to add to all pods
   annotations: {}

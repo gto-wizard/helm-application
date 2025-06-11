@@ -15,7 +15,7 @@ spec:
     spec:
       template:
         spec:
-          {{- with .Values.imagePullSecrets }}
+          {{- with .Values.image.pullSecrets }}
           imagePullSecrets:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -30,7 +30,7 @@ spec:
             {{- with .Values.cronjob.args }}
             args: {{- include "application.render" (dict "value" . "context" $) | nindent 12 }}
             {{- end }}
-            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
             {{- with .Values.cronjob.resources }}
             resources: {{- toYaml . | nindent 14 }}
             {{- end }}
