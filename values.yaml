@@ -34,7 +34,7 @@ common:
     ## @param common.labels.partOf Part-of label to group related resources
     partOf: ""
     ## @param common.labels.managedBy Managed-by label to specify the tool managing the resource
-    managedBy: "ArgoCD"
+    managedBy: ""
 
   ## @param common.extraLabels Array with labels to add to all pods
   extraLabels: {}

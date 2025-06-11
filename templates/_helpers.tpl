@@ -14,8 +14,8 @@ Usage:
 {{- define "application.labels" -}}
 app.kubernetes.io/name: {{ include "application.name" . }}
 app.kubernetes.io/version: {{ .Values.image.overrideTag | default .Values.image.shasum | default .Values.image.tag }}
-app.kubernetes.io/component: {{ required "common.labels.component is required" .Values.common.labels.component }}
-app.kubernetes.io/part-of: {{ required "common.labels.partOf is required" .Values.common.labels.partOf }}
+app.kubernetes.io/component: {{ .Values.common.labels.component }}
+app.kubernetes.io/part-of: {{ .Values.common.labels.partOf }}
 app.kubernetes.io/managed-by: {{ .Values.common.labels.managedBy | default .Release.Service }}
 helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- if .Values.common.extraLabels }}
