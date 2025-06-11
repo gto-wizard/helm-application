@@ -13,7 +13,7 @@ Usage:
 */}}
 {{- define "application.labels" -}}
 app.kubernetes.io/name: {{ include "application.name" . }}
-app.kubernetes.io/version: {{ .Values.image.overrideTag | default .Values.image.shasum | default .Values.image.tag }}
+app.kubernetes.io/version: {{ .Values.image.overrideTag | default .Values.image.shasum | default .Values.image.tag | quote }}
 app.kubernetes.io/component: {{ .Values.common.labels.component }}
 app.kubernetes.io/part-of: {{ .Values.common.labels.partOf }}
 app.kubernetes.io/managed-by: {{ .Values.common.labels.managedBy | default .Release.Service }}
