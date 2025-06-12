@@ -12,8 +12,7 @@ Usage:
 {{ include "application.labels" . }}
 */}}
 {{- define "application.labels" -}}
-app.kubernetes.io/name: {{ .Values.common.labels.name }}
-app.kubernetes.io/instance: {{ include "application.name" . }}
+{{- include "application.selectorLabels" . }}
 app.kubernetes.io/version: {{ .Values.image.overrideTag | default .Values.image.shasum | default .Values.image.tag | quote }}
 app.kubernetes.io/component: {{ .Values.common.labels.component }}
 app.kubernetes.io/part-of: {{ .Values.common.labels.partOf }}
@@ -30,9 +29,12 @@ helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | 
 
 {{/*
 Selector labels
+Usage:
+{{- include "application.selectorLabels" . }}
 */}}
 {{- define "application.selectorLabels" -}}
-selector-label: app
+app.kubernetes.io/name:  {{ .Values.common.labels.name }}
+app.kubernetes.io/instance: {{ include "application.name" . }}
 {{- end }}
 
 {{/*
