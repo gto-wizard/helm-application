@@ -29,6 +29,8 @@ common:
 
   ## Labels to add to all resources created by the chart
   labels:
+    ## @param common.labels.name Name label to override the default application name for all resources
+    name: ""
     ## @param common.labels.component Component label to identify the application component
     component: ""
     ## @param common.labels.partOf Part-of label to group related resources
