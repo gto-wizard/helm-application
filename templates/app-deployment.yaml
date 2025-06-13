@@ -18,15 +18,14 @@ spec:
   strategy: {{- toYaml .Values.application.updateStrategy | nindent 4 }}
   selector:
     matchLabels:
-      {{- include "application.selectorLabels.app" . | nindent 6 }}
+      {{- include "application.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       annotations: {{- toYaml .Values.application.podAnnotations | nindent 8 }}
       labels:
-        {{- include "application.selectorLabels.app" . | nindent 8 }}
         {{- include "application.labels" . | nindent 8 }}
     spec:
-      {{- with .Values.imagePullSecrets }}
+      {{- with .Values.image.pullSecrets }}
       imagePullSecrets: {{- toYaml . | nindent 8}}
       {{- end }}
       serviceAccountName: {{ include "application.serviceAccountName" . }}
@@ -37,7 +36,7 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           image: {{ include "application.image" . | quote }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
           lifecycle: {{- toYaml .Values.application.lifecycle | nindent 12 }}
           command: {{- toYaml .Values.application.command | nindent 12 }}
           args: {{- toYaml .Values.application.args | nindent 12 }}

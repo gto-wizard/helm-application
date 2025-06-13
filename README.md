@@ -28,18 +28,26 @@ helm pull application ghcr.io/gto-wizard/helm-application/charts/application --v
 
 ## Parameters
 
-### Global parameters
+### Image parameters
 
-| Name               | Description                                              | Value |
-| ------------------ | -------------------------------------------------------- | ----- |
-| `imagePullSecrets` | List of secrets containing credentials to image registry | `nil` |
-| `nameOverride`     | String to fully override application.name template       | `""`  |
+| Name                | Description                                                                                                         | Value          |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `image.repository`  | The container image repository (e.g. nginx, myrepo/app) used for all workloads                                      | `""`           |
+| `image.pullPolicy`  | Image pull policy for the container (Allowed values: Always, IfNotPresent)                                          | `IfNotPresent` |
+| `image.tag`         | The image tag to use (ignored if overrideTag or shasum is set)                                                      | `""`           |
+| `image.shasum`      | The image digest (SHA256) to use instead of a tag (takes precedence over tag, but ignored if overrideTag is set)    | `""`           |
+| `image.overrideTag` | If set, this tag overrides image.tag and image.shasum for all workloads (takes precedence over both tag and shasum) | `""`           |
+| `image.pullSecrets` | List of secrets containing credentials to image registry                                                            | `[]`           |
 
 ### Common parameters
 
 | Name                               | Description                                                                                                                                                                                                                                              | Value |
 | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| `common.labels`                    | Array with labels to add to all pods                                                                                                                                                                                                                     | `{}`  |
+| `common.labels.name`               | Name label to override the default application name for all resources                                                                                                                                                                                    | `""`  |
+| `common.labels.component`          | Component label to identify the application component                                                                                                                                                                                                    | `""`  |
+| `common.labels.partOf`             | Part-of label to group related resources                                                                                                                                                                                                                 | `""`  |
+| `common.labels.managedBy`          | Managed-by label to specify the tool managing the resource                                                                                                                                                                                               | `""`  |
+| `common.extraLabels`               | Array with labels to add to all pods                                                                                                                                                                                                                     | `{}`  |
 | `common.annotations`               | Array with annotations to add to all pods                                                                                                                                                                                                                | `{}`  |
 | `common.topologySpreadConstraints` | List with constraints controlling how pods are spread across the cluster. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/                                                                                      | `[]`  |
 | `common.nodeSelector`              | Array with Node labels for all pods assignment is rendered only if deployments and jobs nodeSelector is empty. ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector                                                | `{}`  |
