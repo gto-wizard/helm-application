@@ -9,5 +9,5 @@ spec:
   {{- toYaml .Values.application.podDisruptionBudget | nindent 2 }}
   selector:
     matchLabels:
-      {{- include "application.selectorLabels.app" . | nindent 6 }}
+      {{- include "application.selectorLabels" . | nindent 6 }}
 {{- end }}

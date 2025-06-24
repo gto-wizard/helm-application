@@ -790,7 +790,7 @@ keda:
   cooldownPeriod:   300
 
   ## @param keda.idleReplicaCount If this property is set, KEDA will scale the resource down to this number of replicas.
-  idleReplicaCount: 0
+  idleReplicaCount: null
 
   ## @param keda.minReplicaCount Minimum number of replicas KEDA will scale the resource down to.
   minReplicaCount:  1

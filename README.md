@@ -210,7 +210,7 @@ helm pull application ghcr.io/gto-wizard/helm-application/charts/application --v
 | `keda.annotations`      | Array with annotations to add to all pods                                                                                                                | `{}`    |
 | `keda.pollingInterval`  | This is the interval to check each trigger on                                                                                                            | `30`    |
 | `keda.cooldownPeriod`   | The period to wait after the last trigger reported active before scaling the resource back to 0                                                          | `300`   |
-| `keda.idleReplicaCount` | If this property is set, KEDA will scale the resource down to this number of replicas.                                                                   | `0`     |
+| `keda.idleReplicaCount` | If this property is set, KEDA will scale the resource down to this number of replicas.                                                                   | `nil`   |
 | `keda.minReplicaCount`  | Minimum number of replicas KEDA will scale the resource down to.                                                                                         | `1`     |
 | `keda.maxReplicaCount`  | This setting is passed to the HPA definition that KEDA will create for a given resource and holds the maximum number of replicas of the target resource. | `100`   |
 | `keda.fallback`         | Defines a number of replicas to fall back to if a scaler is in an error state. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#fallback     | `{}`    |
