@@ -530,8 +530,13 @@ externalSecrets:
   #     ## @param externalSecrets.creationPolicy String with definition of how the operator creates the a secret
   #     creationPolicy: Owner
 
-  #     ## @param externalSecrets.variables list of variable names from GitLab to expose to the container
-  #     variables: []
+  #     ## @param externalSecrets.data defines the connection between the Kubernetes Secret keys and the Provider data
+  #     data: []
+  #     # data:
+  #     # - secretKey: SQL_PASSWORD
+  #     #   remoteRef:
+  #     #     key: dev/infrastructure/cnpg/webapp-boar/webapp-main-dev/django_user
+  #     #     property: password
 
   #     ## @param externalSecrets.template External Secrets template definition
   #     template: {}
