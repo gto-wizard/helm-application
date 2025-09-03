@@ -17,7 +17,7 @@ spec:
         {{- include "application.selectorLabels" $ | nindent 8 }}
     spec:
       restartPolicy: {{ .restartPolicy }}
-      {{- with .Values.image.pullSecrets }}
+      {{- with $.Values.image.pullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
