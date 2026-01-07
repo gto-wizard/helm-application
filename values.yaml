@@ -673,7 +673,7 @@ ingress:
 ingresses:
   ## @param ingresses.enabled Specifies whether a ingresses should be created
   enabled: false
-  ## @param ingresses.backendService Configuration for the backend service that the ingress will point to
+
   backendService:
     ## @param ingresses.backendService.name Name of the backend service. If not set, will use the full name of the application
     name: ""
@@ -855,7 +855,6 @@ kedaHttp:
   pathPrefixes:
     - /
 
-  ## @param kedaHttp.scaleTargetRef [object] Target workload and service to scale and route traffic to
   scaleTargetRef:
 
     ## @param kedaHttp.scaleTargetRef.name Name of the workload to scale
@@ -876,7 +875,6 @@ kedaHttp:
     ## @param kedaHttp.scaleTargetRef.portName Port name exposed by the Service (alternative to port)
     portName: null
 
-  ## @param kedaHttp.replicas [object] Minimum and maximum number of replicas
   replicas:
 
     ## @param kedaHttp.replicas.min Minimum number of replicas
