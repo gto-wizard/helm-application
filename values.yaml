@@ -822,3 +822,89 @@ keda:
   #       subscriptionName: sbsub-app-service
   #       namespace: servicebus-app-ns
   #       messageCount: 50 # queue size treshold KEDA needs to hit to scale up/down
+
+
+## @section Keda HTTPScaledObject parameters. Ref: https://github.com/kedacore/http-add-on
+kedaHttp:
+
+  ## @param kedaHttp.enabled Specifies whether a KEDA HTTPScaledObject should be created
+  enabled: false
+
+  ## @param kedaHttp.labels Array with labels to add to the HTTPScaledObject
+  labels: {}
+
+  ## @param kedaHttp.annotations Array with annotations to add to the HTTPScaledObject
+  ## Ref: https://github.com/kedacore/http-add-on#httpscaledobjectkedishskip-scaledobject-creation-annotation
+  annotations: {}
+  # annotations:
+  #   httpscaledobject.keda.sh/skip-scaledobject-creation: "false"
+
+  ## @param kedaHttp.hosts [array] Hosts to apply this scaling rule to (Host header match)
+  hosts: []
+  # hosts:
+  #   - myhost.com
+
+  ## @param kedaHttp.pathPrefixes [array] Path prefixes to apply this scaling rule to
+  ## Default: ["/"]
+  pathPrefixes:
+    - /
+
+  ## @param kedaHttp.scaleTargetRef [object] Target workload and service to scale and route traffic to
+  scaleTargetRef:
+
+    ## @param kedaHttp.scaleTargetRef.name Name of the workload to scale
+    name: ""
+
+    ## @param kedaHttp.scaleTargetRef.kind Kind of the workload to scale
+    kind: Deployment
+
+    ## @param kedaHttp.scaleTargetRef.apiVersion API version of the workload to scale
+    apiVersion: apps/v1
+
+    ## @param kedaHttp.scaleTargetRef.service Name of the Service to route traffic to
+    service: ""
+
+    ## @param kedaHttp.scaleTargetRef.port Port number exposed by the Service
+    port: null
+
+    ## @param kedaHttp.scaleTargetRef.portName Port name exposed by the Service (alternative to port)
+    portName: null
+
+  ## @param kedaHttp.replicas [object] Minimum and maximum number of replicas
+  replicas:
+
+    ## @param kedaHttp.replicas.min Minimum number of replicas
+    min: 0
+
+    ## @param kedaHttp.replicas.max Maximum number of replicas
+    max: 10
+
+  ## @param kedaHttp.scaledownPeriod Period (in seconds) to wait after last active request before scaling down
+  ## Default: 300
+  scaledownPeriod: 300
+
+  ## @param kedaHttp.scalingMetric [object] Scaling configuration (requestRate or concurrency)
+  ## NOTE: requestRate and concurrency are mutually exclusive
+  scalingMetric:
+
+    ## @param kedaHttp.scalingMetric.requestRate [object] Scale based on HTTP request rate
+    # requestRate:
+    #
+    #   ## @param kedaHttp.scalingMetric.requestRate.targetValue Target request rate value
+    #   ## Default: 100
+    #   targetValue: 100
+    #
+    #   ## @param kedaHttp.scalingMetric.requestRate.window Aggregation window
+    #   ## Default: "1m"
+    #   window: 1m
+    #
+    #   ## @param kedaHttp.scalingMetric.requestRate.granularity Request aggregation granularity
+    #   ## Default: "1s"
+    #   granularity: 1s
+
+    ## @param kedaHttp.scalingMetric.concurrency [object] Scale based on request concurrency
+    # concurrency:
+    #
+    #   ## @param kedaHttp.scalingMetric.concurrency.targetValue Target concurrency value
+    #   ## Default: 100
+    #   targetValue: 100
