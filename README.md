@@ -178,9 +178,11 @@ helm pull application ghcr.io/gto-wizard/helm-application/charts/application --v
 
 ### Ingresses parameters
 
-| Name                | Description                                     | Value   |
-| ------------------- | ----------------------------------------------- | ------- |
-| `ingresses.enabled` | Specifies whether a ingresses should be created | `false` |
+| Name                            | Description                                                                        | Value   |
+| ------------------------------- | ---------------------------------------------------------------------------------- | ------- |
+| `ingresses.enabled`             | Specifies whether a ingresses should be created                                    | `false` |
+| `ingresses.backendService.name` | Name of the backend service. If not set, will use the full name of the application | `""`    |
+| `ingresses.backendService.port` | Port of the backend service. If not set, will use .Values.service.port             | `""`    |
 
 ### Service Monitor parameters
 
@@ -216,3 +218,25 @@ helm pull application ghcr.io/gto-wizard/helm-application/charts/application --v
 | `keda.fallback`         | Defines a number of replicas to fall back to if a scaler is in an error state. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#fallback     | `{}`    |
 | `keda.advanced`         | Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#advanced                                                                                    | `{}`    |
 | `keda.triggers`         | List of triggers to activate scaling of the target resource. Ref: https://keda.sh/docs/2.13/concepts/scaling-deployments/#triggers                       | `[]`    |
+
+### Keda HTTPScaledObject parameters. Ref: https://github.com/kedacore/http-add-on
+
+| Name                                 | Description                                                               | Value        |
+| ------------------------------------ | ------------------------------------------------------------------------- | ------------ |
+| `kedaHttp.enabled`                   | Specifies whether a KEDA HTTPScaledObject should be created               | `false`      |
+| `kedaHttp.labels`                    | Array with labels to add to the HTTPScaledObject                          | `{}`         |
+| `kedaHttp.annotations`               | Array with annotations to add to the HTTPScaledObject                     | `{}`         |
+| `kedaHttp.hosts`                     | Hosts to apply this scaling rule to (Host header match)                   | `[]`         |
+| `kedaHttp.pathPrefixes`              | Path prefixes to apply this scaling rule to                               | `[]`         |
+| `kedaHttp.scaleTargetRef.name`       | Name of the workload to scale                                             | `""`         |
+| `kedaHttp.scaleTargetRef.kind`       | Kind of the workload to scale                                             | `Deployment` |
+| `kedaHttp.scaleTargetRef.apiVersion` | API version of the workload to scale                                      | `apps/v1`    |
+| `kedaHttp.scaleTargetRef.service`    | Name of the Service to route traffic to                                   | `""`         |
+| `kedaHttp.scaleTargetRef.port`       | Port number exposed by the Service                                        | `nil`        |
+| `kedaHttp.scaleTargetRef.portName`   | Port name exposed by the Service (alternative to port)                    | `nil`        |
+| `kedaHttp.replicas.min`              | Minimum number of replicas                                                | `0`          |
+| `kedaHttp.replicas.max`              | Maximum number of replicas                                                | `10`         |
+| `kedaHttp.scaledownPeriod`           | Period (in seconds) to wait after last active request before scaling down | `300`        |
+| `kedaHttp.scalingMetric`             | Scaling configuration (requestRate or concurrency)                        | `{}`         |
+| `kedaHttp.scalingMetric.requestRate` | Scale based on HTTP request rate                                          | `{}`         |
+| `kedaHttp.scalingMetric.concurrency` | Scale based on request concurrency                                        | `{}`         |
