@@ -33,8 +33,7 @@ spec:
     service: {{ default (include "application.name" .) .Values.kedaHttp.scaleTargetRef.service }}
     {{- if .Values.kedaHttp.scaleTargetRef.port }}
     port: {{ .Values.kedaHttp.scaleTargetRef.port }}
-    {{- end }}
-    {{- if .Values.kedaHttp.scaleTargetRef.portName }}
+    {{- else if .Values.kedaHttp.scaleTargetRef.portName }}
     portName: {{ .Values.kedaHttp.scaleTargetRef.portName }}
     {{- end }}
 
