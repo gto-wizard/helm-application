@@ -39,8 +39,8 @@ spec:
     {{- end }}
 
   replicas:
-    min: {{ .Values.kedaHttp.replicas.min }}
-    max: {{ .Values.kedaHttp.replicas.max }}
+    min: {{ required "kedaHttp.replicas.min is required" .Values.kedaHttp.replicas.min }}
+    max: {{ required "kedaHttp.replicas.max is required" .Values.kedaHttp.replicas.max }}
 
   {{- if .Values.kedaHttp.scaledownPeriod }}
   scaledownPeriod: {{ .Values.kedaHttp.scaledownPeriod }}
