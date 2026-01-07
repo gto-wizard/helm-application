@@ -1,0 +1,53 @@
+{{- if .Values.kedaHttp.enabled }}
+apiVersion: http.keda.sh/v1alpha1
+kind: HTTPScaledObject
+metadata:
+  name: {{ include "application.name" . }}
+  labels:
+    {{- include "application.labels" . | nindent 4 }}
+    {{- with .Values.kedaHttp.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- with .Values.common.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.kedaHttp.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- with .Values.kedaHttp.hosts }}
+  hosts:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  {{- with .Values.kedaHttp.pathPrefixes }}
+  pathPrefixes:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  scaleTargetRef:
+    name: {{ default (include "application.name" .) .Values.kedaHttp.scaleTargetRef.name }}
+    kind: {{ default "Deployment" .Values.kedaHttp.scaleTargetRef.kind }}
+    apiVersion: {{ default "apps/v1" .Values.kedaHttp.scaleTargetRef.apiVersion }}
+    service: {{ default (include "application.name" .) .Values.kedaHttp.scaleTargetRef.service }}
+    {{- if .Values.kedaHttp.scaleTargetRef.port }}
+    port: {{ .Values.kedaHttp.scaleTargetRef.port }}
+    {{- end }}
+    {{- if .Values.kedaHttp.scaleTargetRef.portName }}
+    portName: {{ .Values.kedaHttp.scaleTargetRef.portName }}
+    {{- end }}
+
+  replicas:
+    min: {{ .Values.kedaHttp.replicas.min }}
+    max: {{ .Values.kedaHttp.replicas.max }}
+
+  {{- if .Values.kedaHttp.scaledownPeriod }}
+  scaledownPeriod: {{ .Values.kedaHttp.scaledownPeriod }}
+  {{- end }}
+
+  {{- with .Values.kedaHttp.scalingMetric }}
+  scalingMetric:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
