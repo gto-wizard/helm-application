@@ -3,6 +3,8 @@
 {{- $fullName := include "application.name" . -}}
 {{- $svcPort := .Values.service.port -}}
 {{- $paths := .Values.ingresses.paths -}}
+{{- $backendServiceName := default $fullName .Values.ingresses.backendService.name -}}
+{{- $backendServicePort := default $svcPort .Values.ingresses.backendService.port -}}
 {{- range $ingress := .Values.ingresses.rules }}
 
 ---
@@ -43,9 +45,9 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ $fullName }}
+                name: {{ $backendServiceName }}
                 port:
-                  number: {{ $svcPort }}
+                  number: {{ $backendServicePort }}
           {{- end }}
           {{- else }}
           {{- range $paths }}
@@ -53,9 +55,9 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ $fullName }}
+                name: {{ $backendServiceName }}
                 port:
-                  number: {{ $svcPort }}
+                  number: {{ $backendServicePort }}
           {{- end }}
           {{- end }}
           {{- if $ingress.extraPaths }}
@@ -64,9 +66,9 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ $fullName }}
+                name: {{ $backendServiceName }}
                 port:
-                  number: {{ $svcPort }}
+                  number: {{ $backendServicePort }}
           {{- end }}
           {{- end }}
     {{- end }}
