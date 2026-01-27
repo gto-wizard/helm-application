@@ -13,8 +13,13 @@ metadata:
 spec:
   template:
     metadata:
+      annotations: 
+        {{- with $.Values.common.annotations }}{{- toYaml . | nindent 8 }}{{- end }}
+        {{- with $.Values.application.annotations }}{{- toYaml . | nindent 8 }}{{- end }}
+        {{- with .annotations }}{{- toYaml . | nindent 8 }}{{- end }}
       labels:
-        {{- include "application.selectorLabels" $ | nindent 8 }}
+        {{- include "application.labels" $ | nindent 8 }}
+        {{- with .labels }}{{- toYaml . | nindent 8 }}{{- end }}
     spec:
       restartPolicy: {{ .restartPolicy }}
       {{- with $.Values.image.pullSecrets }}
