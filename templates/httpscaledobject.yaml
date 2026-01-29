@@ -1,4 +1,6 @@
 {{- if .Values.kedaHttp.enabled }}
+{{- $port := default .Values.service.port .Values.kedaHttp.scaleTargetRef.port -}}
+{{- $portName := default .Values.service.name .Values.kedaHttp.scaleTargetRef.portName -}}
 apiVersion: http.keda.sh/v1alpha1
 kind: HTTPScaledObject
 metadata:
@@ -31,10 +33,10 @@ spec:
     kind: {{ default "Deployment" .Values.kedaHttp.scaleTargetRef.kind }}
     apiVersion: {{ default "apps/v1" .Values.kedaHttp.scaleTargetRef.apiVersion }}
     service: {{ default (include "application.name" .) .Values.kedaHttp.scaleTargetRef.service }}
-    {{- if .Values.kedaHttp.scaleTargetRef.port }}
-    port: {{ .Values.kedaHttp.scaleTargetRef.port }}
-    {{- else if .Values.kedaHttp.scaleTargetRef.portName }}
-    portName: {{ .Values.kedaHttp.scaleTargetRef.portName }}
+    {{- if $port }}
+    port: {{ $port }}
+    {{- else if $portName }}
+    portName: {{ $portName }}
     {{- end }}
 
   replicas:
