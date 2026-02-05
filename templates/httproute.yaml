@@ -22,5 +22,6 @@ spec:
   {{- if .Values.httpRoute.hostnames }}
   hostnames: {{- include "application.render" ( dict "value" .Values.httpRoute.hostnames "context" $ ) | nindent 4 }}
   {{- end }}
-  rules: {{- include "application.render" ( dict "value" .Values.httpRoute.rules "context" $ ) | nindent 4 }}
+  {{- $rules := required "httpRoute.rules must be set" .Values.httpRoute.rules }}
+  rules: {{- include "application.render" ( dict "value" $rules "context" $ ) | nindent 4 }}
 {{- end }}
