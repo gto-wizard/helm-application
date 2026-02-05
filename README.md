@@ -183,6 +183,10 @@ helm pull application ghcr.io/gto-wizard/helm-application/charts/application --v
 | `ingresses.enabled`             | Specifies whether a ingresses should be created                                    | `false` |
 | `ingresses.backendService.name` | Name of the backend service. If not set, will use the full name of the application | `""`    |
 | `ingresses.backendService.port` | Port of the backend service. If not set, will use .Values.service.port             | `""`    |
+| `httpRoute.enabled`             | Enable HTTPRoute (Gateway API).                                                    | `true`  |
+| `httpRoute.useDefaultGateways`  | The default Gateway scope to use for this Route.                                   | `nil`   |
+| `httpRoute.gatewayNamespace`    | Namespace of the Gateway to attach this HTTPRoute to.                              | `""`    |
+| `httpRoute.hostnames`           | Hostnames for the HTTPRoute                                                        | `nil`   |
 
 ### Service Monitor parameters
 

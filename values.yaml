@@ -709,6 +709,34 @@ ingresses:
   #      hosts:
   #       - chart-example.local
 
+httpRoute:
+  ## @param httpRoute.enabled Enable HTTPRoute (Gateway API).
+  enabled: false
+  ## @skip httpRoute.parentRefs Parent references for the HTTPRoute. Set to null to omit parentRefs from the HTTPRoute.
+  parentRefs: null
+  # parentRefs:
+  # - name: my-gateway
+  #   sectionName: bar
+  ## @param httpRoute.useDefaultGateways The default Gateway scope to use for this Route.
+  useDefaultGateways:
+  ## @param httpRoute.gatewayNamespace Namespace of the Gateway to attach this HTTPRoute to.
+  gatewayNamespace: ""
+  ## @param httpRoute.hostnames Hostnames for the HTTPRoute
+  hostnames:
+  ## @skip httpRoute.additionalLabels Parent references for the HTTPRoute.
+  additionalLabels: {}
+  ## @skip httpRoute.annotations Annotations for HTTPRoute
+  annotations: {}
+  ## @skip httpRoute.rules HTTPRoute Parameters
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: '{{ include "application.name" $ }}'
+          port: '{{ .Values.service.port | int }}'
+
 # -- Extra objects to deploy (value evaluated as a template)
 # -- In some cases, it can avoid the need for additional, extended or adhoc deployments.
 # -- See #595 for more details and traefik/tests/extra.yaml for example.
