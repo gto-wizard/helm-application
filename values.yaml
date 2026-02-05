@@ -711,11 +711,12 @@ ingresses:
 
 httpRoute:
   ## @param httpRoute.enabled Enable HTTPRoute (Gateway API).
-  enabled: true
-  ## @skip httpRoute.parentRefs Parent references for the HTTPRoute.
-  parentRefs:
-    # - name: my-gateway
-    #   sectionName: bar
+  enabled: false
+  ## @skip httpRoute.parentRefs Parent references for the HTTPRoute. Set to null to omit parentRefs from the HTTPRoute.
+  parentRefs: null
+  # parentRefs:
+  # - name: my-gateway
+  #   sectionName: bar
   ## @param httpRoute.useDefaultGateways The default Gateway scope to use for this Route.
   useDefaultGateways:
   ## @param httpRoute.gatewayNamespace Namespace of the Gateway to attach this HTTPRoute to.
