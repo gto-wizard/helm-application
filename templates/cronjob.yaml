@@ -71,5 +71,5 @@ spec:
           tolerations:      {{- .Values.cronjob.tolerations | default .Values.common.tolerations | toYaml | nindent 12 }}
           affinity:         {{- .Values.cronjob.affinity | default .Values.common.affinity | toYaml | nindent 12 }}
           securityContext:  {{- .Values.cronjob.podSecurityContext | default .Values.common.podSecurityContext | toYaml | nindent 12 }}
-          volumes: {{- toYaml .Values.cronjob.volumes | nindent 8 }}
+          volumes: {{- toYaml .Values.cronjob.volumes | nindent 12 }}
 {{- end }}
