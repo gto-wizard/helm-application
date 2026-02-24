@@ -498,6 +498,12 @@ cronjob:
   ## @param cronjob.command Override default container command (useful when using custom images)
   command: []
 
+  ## @param cronjob.volumes Optionally specify extra list of additional volumes for the cronjob pod(s)
+  volumes: []
+
+  ## @param cronjob.volumeMounts Optionally specify extra list of additional volumeMounts for the cronjob container(s)
+  volumeMounts: []
+
 ## @section External Secrets parameters
 ## secrets need to be also specified in `secretEnv` to be available for containers
 externalSecrets:
