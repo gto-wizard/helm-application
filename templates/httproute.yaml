@@ -23,5 +23,15 @@ spec:
   hostnames: {{- include "application.render" ( dict "value" .Values.httpRoute.hostnames "context" $ ) | nindent 4 }}
   {{- end }}
   {{- $rules := required "httpRoute.rules must be set" .Values.httpRoute.rules }}
-  rules: {{- include "application.render" ( dict "value" $rules "context" $ ) | nindent 4 }}
+  {{- $rules := include "application.render" (dict "value" .Values.httpRoute.rules "context" $) | fromYamlArray }}
+  rules:
+  {{- range $rules }}
+    - backendRefs:
+      {{- range .backendRefs }}
+      - name: {{ .name }}
+        port: {{ .port | int }}
+      {{- end }}
+      matches:
+        {{- toYaml .matches | nindent 6 }}
+  {{- end }}
 {{- end }}
