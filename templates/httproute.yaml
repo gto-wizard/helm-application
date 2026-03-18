@@ -27,10 +27,7 @@ spec:
   rules:
   {{- range $rules }}
     - backendRefs:
-      {{- range .backendRefs }}
-      - name: {{ .name }}
-        port: {{ .port | int }}
-      {{- end }}
+        {{- toYaml .backendRefs | nindent 6 }}
       matches:
         {{- toYaml .matches | nindent 6 }}
   {{- end }}
