@@ -6,7 +6,27 @@ on:
       - main
 
 jobs:
+  check-skip:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.check.outputs.should_skip }}
+    steps:
+      - name: Check for skip-release label
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pulls = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+            });
+            const skip = pulls.data.some(pr => pr.labels.some(l => l.name === 'skip-release'));
+            core.setOutput('should_skip', skip.toString());
+
   release:
+    needs: check-skip
+    if: needs.check-skip.outputs.should_skip != 'true'
     # depending on default permission settings for your org (contents being read-only or read-write for workloads), you will have to add permissions
     # see: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#modifying-the-permissions-for-the-github_token
     permissions:
