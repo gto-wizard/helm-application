@@ -119,7 +119,7 @@ Fix any lint errors before opening a PR. The CI pipeline runs `ct lint` + `ct in
 ## Step 5: Open PR
 
 ```bash
-git checkout -b feat(<scope>): <description>
+git checkout -b feat/<scope>-<description>
 git add templates/<feature>.yaml values.yaml
 git commit -m "feat(<scope>): add <feature> template"
 git push -u origin HEAD

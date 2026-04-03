@@ -181,7 +181,7 @@ helm template my-release . --set <feature>.enabled=true | grep -A2 "port:"
 ## Step 3: Open a fix PR
 
 ```bash
-git checkout -b fix(<scope>): <short description>
+git checkout -b fix/<scope>-<short-description>
 git add templates/<file>.yaml
 git commit -m "fix(<scope>): <description of what was wrong and what was fixed>"
 git push -u origin HEAD
