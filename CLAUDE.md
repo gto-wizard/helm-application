@@ -80,6 +80,13 @@ Environment variables follow a merge pattern: `common.env` is merged with worklo
 - `poddisruptionbudget.yaml` — PDB
 - `extra-objects.yaml` — escape hatch for arbitrary K8s manifests via `extraObjects[]`
 
+## Skills
+
+Claude Code skills in `.claude/skills/`:
+
+- `add-helm-template` — add a new Kubernetes resource template to the chart
+- `fix-helm-template` — diagnose and fix template bugs (nil pointer, type mismatch, wrong scope, missing labels)
+
 ## Conventions
 
 - `README.md` is auto-generated — document parameters using `@param` / `@section` annotations in `values.yaml`
