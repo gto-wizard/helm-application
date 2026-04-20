@@ -26,9 +26,13 @@ spec:
   {{- $rules := include "application.render" (dict "value" .Values.httpRoute.rules "context" $) | fromYamlArray }}
   rules:
   {{- range $rules }}
-    - backendRefs:
-        {{- toYaml .backendRefs | nindent 6 }}
-      matches:
+    - matches:
         {{- toYaml .matches | nindent 6 }}
+      {{- if .filters }}
+      filters:
+        {{- toYaml .filters | nindent 6 }}
+      {{- end }}
+      backendRefs:
+        {{- toYaml .backendRefs | nindent 6 }}
   {{- end }}
 {{- end }}
