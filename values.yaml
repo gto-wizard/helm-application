@@ -733,12 +733,18 @@ httpRoute:
   additionalLabels: {}
   ## @skip httpRoute.annotations Annotations for HTTPRoute
   annotations: {}
-  ## @skip httpRoute.rules HTTPRoute Parameters
+  ## @skip httpRoute.rules HTTPRoute Parameters (matches, optional filters, backendRefs per rule)
   rules:
     - matches:
         - path:
             type: PathPrefix
             value: /
+      # filters:
+      #   - type: RequestHeaderModifier
+      #     requestHeaderModifier:
+      #       set:
+      #         - name: X-Forwarded-Proto
+      #           value: https
       backendRefs:
         - name: '{{ include "application.name" $ }}'
           port: '{{ .Values.service.port | int }}'
