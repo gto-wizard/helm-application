@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "Chart.yaml"
+      - "values.yaml"
+      - "templates/**"
+      - "crds/**"
 
 jobs:
   check-skip:
