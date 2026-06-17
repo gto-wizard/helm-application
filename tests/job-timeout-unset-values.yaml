@@ -1,0 +1,7 @@
+# helm-template render fixture (NOT a chart-testing `ci/` install fixture — see tests/README.md).
+# Case: neither activeDeadlineSeconds nor backoffLimit set -> both lines must be ABSENT (no regression for existing consumers).
+application:
+  jobs:
+    - nameSuffix: "migrate"
+      command: ["echo", "migrate"]
+      restartPolicy: "Never"
