@@ -1,0 +1,11 @@
+# helm-template render fixture (NOT a chart-testing `ci/` install fixture — see tests/README.md).
+# Case: literal 0 -> both lines must be EMITTED with value 0. Pins the nil-aware guard so a
+# `with`-guard regression (which silently drops 0 and falls back to K8s default backoffLimit=6)
+# can never return. backoffLimit: 0 is an established org convention (gtowiz-dwh prod jobs).
+application:
+  jobs:
+    - nameSuffix: "migrate"
+      command: ["echo", "migrate"]
+      restartPolicy: "Never"
+      activeDeadlineSeconds: 0
+      backoffLimit: 0

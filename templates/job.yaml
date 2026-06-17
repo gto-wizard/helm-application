@@ -11,6 +11,13 @@ metadata:
     {{- with $.Values.application.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
     {{- with .annotations }}{{- toYaml . | nindent 4 }}{{- end }}
 spec:
+  {{- /* nil-aware guard, not `with`: a literal 0 is a valid value `with` would drop */}}
+  {{- if not (kindIs "invalid" .activeDeadlineSeconds) }}
+  activeDeadlineSeconds: {{ .activeDeadlineSeconds | int }}
+  {{- end }}
+  {{- if not (kindIs "invalid" .backoffLimit) }}
+  backoffLimit: {{ .backoffLimit | int }}
+  {{- end }}
   template:
     metadata:
       annotations: 

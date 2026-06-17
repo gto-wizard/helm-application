@@ -1,0 +1,9 @@
+# helm-template render fixture (NOT a chart-testing `ci/` install fixture — see tests/README.md).
+# Case: positive values -> both lines must be EMITTED with the given values.
+application:
+  jobs:
+    - nameSuffix: "migrate"
+      command: ["echo", "migrate"]
+      restartPolicy: "Never"
+      activeDeadlineSeconds: 600
+      backoffLimit: 3
