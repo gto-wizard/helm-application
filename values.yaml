@@ -195,6 +195,12 @@ application:
   #     ## @param application.jobs.restartPolicy Only a RestartPolicy equal to Never or OnFailure is allowed
   #     restartPolicy: "Never"
 
+  #     ## @param application.jobs.activeDeadlineSeconds Optional Job-level deadline in seconds; bounds runtime so a stuck Job (e.g. ImagePullBackOff) fails instead of hanging. ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/#job-termination-and-cleanup
+  #     activeDeadlineSeconds: 600
+
+  #     ## @param application.jobs.backoffLimit Optional number of retries before the Job is marked failed. ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/#pod-backoff-failure-policy
+  #     backoffLimit: 3
+
   #     ## @param application.jobs.lifecycle Array with lifecycle definitions to add to job
   #     lifecycle: {}
   #     # lifecycle:
