@@ -11,6 +11,9 @@ metadata:
     {{- with .Values.service.annotations }}{{- toYaml . | nindent 4 }}{{- end }}
 spec:
   type: {{ .Values.service.type }}
+  {{- with .Values.service.trafficDistribution }}
+  trafficDistribution: {{ . }}
+  {{- end }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPortName }}
