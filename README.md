@@ -159,16 +159,17 @@ helm pull application ghcr.io/gto-wizard/helm-application/charts/application --v
 
 ### Service parameters
 
-| Name                     | Description                                                      | Value       |
-| ------------------------ | ---------------------------------------------------------------- | ----------- |
-| `service.enabled`        | Specifies whether a service should be created                    | `true`      |
-| `service.labels`         | Array with labels to add to service                              | `{}`        |
-| `service.annotations`    | Array with annotations to add to service                         | `{}`        |
-| `service.type`           | String which allows you to specify what kind of Service you want | `ClusterIP` |
-| `service.port`           | Intiger with incoming port                                       | `80`        |
-| `service.name`           | String with name of the port                                     | `http`      |
-| `service.targetPortName` | String with name of the port to target                           | `http`      |
-| `service.extraPorts`     | Map with extra container ports                                   | `[]`        |
+| Name                          | Description                                                                                              | Value       |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------- | ----------- |
+| `service.enabled`             | Specifies whether a service should be created                                                            | `true`      |
+| `service.labels`              | Array with labels to add to service                                                                      | `{}`        |
+| `service.annotations`         | Array with annotations to add to service                                                                 | `{}`        |
+| `service.type`                | String which allows you to specify what kind of Service you want                                         | `ClusterIP` |
+| `service.trafficDistribution` | String setting spec.trafficDistribution (e.g. PreferSameZone). Rendered only when set; omitted otherwise | `""`        |
+| `service.port`                | Intiger with incoming port                                                                               | `80`        |
+| `service.name`                | String with name of the port                                                                             | `http`      |
+| `service.targetPortName`      | String with name of the port to target                                                                   | `http`      |
+| `service.extraPorts`          | Map with extra container ports                                                                           | `[]`        |
 
 ### Ingress parameters
 

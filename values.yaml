@@ -636,6 +636,9 @@ service:
   ## @param service.type String which allows you to specify what kind of Service you want
   type: ClusterIP
 
+  ## @param service.trafficDistribution String setting spec.trafficDistribution (e.g. PreferSameZone). Rendered only when set; omitted otherwise
+  trafficDistribution: ""
+
   ## @param service.port Intiger with incoming port
   port: 80
 
