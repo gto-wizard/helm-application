@@ -852,6 +852,9 @@ keda:
   ## @param keda.idleReplicaCount If this property is set, KEDA will scale the resource down to this number of replicas.
   idleReplicaCount: null
 
+  ## @param keda.initialReplicas Explicit initial `.spec.replicas` for the Deployment when KEDA is enabled (use 0 for scale-to-zero-from-cold). When null, replicas is omitted so KEDA owns the replica count as before.
+  initialReplicas: null
+
   ## @param keda.minReplicaCount Minimum number of replicas KEDA will scale the resource down to.
   minReplicaCount:  1
 
