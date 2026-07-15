@@ -1,0 +1,12 @@
+# helm-template render fixture (NOT a chart-testing `ci/` install fixture — see tests/README.md).
+# Case: keda.enabled with initialReplicas unset -> the Deployment `replicas` line must be ABSENT
+# (byte-identical to today so KEDA owns the replica count for every existing consumer, incl. prod).
+keda:
+  enabled: true
+  minReplicaCount: 2
+  maxReplicaCount: 10
+  triggers:
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: "60"

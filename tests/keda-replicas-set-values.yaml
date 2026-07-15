@@ -1,0 +1,12 @@
+# helm-template render fixture (NOT a chart-testing `ci/` install fixture — see tests/README.md).
+# Case: keda.enabled with a positive initialReplicas -> `replicas: 3` must be EMITTED.
+keda:
+  enabled: true
+  initialReplicas: 3
+  minReplicaCount: 2
+  maxReplicaCount: 10
+  triggers:
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: "60"

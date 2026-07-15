@@ -12,6 +12,7 @@ live under `tests/` (not `ci/`) so `ct install` never picks them up.
 
 ```bash
 bash tests/render-job-timeout.sh
+bash tests/render-keda-replicas.sh
 ```
 
 ## Coverage
@@ -28,3 +29,16 @@ passthrough across three cases:
 The zero case exists to permanently pin the fix: a `{{- with }}` guard silently drops `0` and lets
 K8s fall back to its default `backoffLimit: 6` — the opposite of the `backoffLimit: 0`
 ("fail immediately") convention used by gtowiz-dwh prod jobs in `k8s-resources`.
+
+`render-keda-replicas.sh` asserts the optional `keda.initialReplicas` Deployment `.spec.replicas`
+passthrough (OPS-919) across three cases, all with `keda.enabled: true`:
+
+| Fixture | Case | Expected |
+|---------|------|----------|
+| `keda-replicas-unset-values.yaml` | `initialReplicas` unset | `replicas` line absent (byte-identical to today — KEDA owns it) |
+| `keda-replicas-zero-values.yaml` | literal `0` | `replicas: 0` emitted (pins the nil-aware guard; scale-to-zero-from-cold) |
+| `keda-replicas-set-values.yaml` | positive | `replicas: 3` emitted |
+
+The zero case exists to permanently pin the behavior: a `{{- with }}` guard silently drops `0` and
+lets the Deployment default to 1 on a cold namespace — an unschedulable pod / first-sync Degraded
+flap in ephemeral preview envs, the exact footgun this opt-in exists to remove.
