@@ -1,0 +1,14 @@
+# helm-template render fixture (NOT a chart-testing `ci/` install fixture — see tests/README.md).
+# Case: keda.enabled with initialReplicas: 0 -> `replicas: 0` must be EMITTED. Pins the nil-aware
+# `kindIs "invalid"` guard so a `with`-guard regression (which silently drops literal 0 and lets the
+# Deployment default to 1 on a cold namespace) can never return. 0 = scale-to-zero-from-cold.
+keda:
+  enabled: true
+  initialReplicas: 0
+  minReplicaCount: 2
+  maxReplicaCount: 10
+  triggers:
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: "60"
