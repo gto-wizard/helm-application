@@ -1,0 +1,11 @@
+# Ports of k8s-resources applications/gtowiz-dwh/prod/values.mcp.yaml.
+nameOverride: mcp
+application:
+  containerPort: 8001
+service:
+  port: 8001
+httpRoute:
+  enabled: true
+networkPolicy:
+  enabled: true
+  sameNamespace: false

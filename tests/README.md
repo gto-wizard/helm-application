@@ -13,7 +13,10 @@ live under `tests/` (not `ci/`) so `ct install` never picks them up.
 ```bash
 bash tests/render-job-timeout.sh
 bash tests/render-keda-replicas.sh
+bash tests/render-networkpolicy.sh
 ```
+
+CI (`lint-and-test.yml`) runs every `tests/render-*.sh`.
 
 ## Coverage
 
@@ -42,3 +45,9 @@ passthrough (OPS-919) across three cases, all with `keda.enabled: true`:
 The zero case exists to permanently pin the behavior: a `{{- with }}` guard silently drops `0` and
 lets the Deployment default to 1 on a cold namespace — an unschedulable pod / first-sync Degraded
 flap in ephemeral preview envs, the exact footgun this opt-in exists to remove.
+
+`render-networkpolicy.sh` asserts the opt-in `networkPolicy` template (OPS-1470). For each
+`netpol-<app>-values.yaml` fixture, the rendered spec must equal `netpol-<app>-expected.yaml`.
+The gto-brain-mcp and dwh-mcp expected files are the two policies of k8s-resources #15385.
+The webapp-django case proves that a sidecar target port (8080) is resolved to its number.
+It also checks: off by default, `allowAll`, and a render failure for an unknown target port name.

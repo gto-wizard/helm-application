@@ -1,0 +1,18 @@
+# Ports of k8s-resources applications/webapp/prod/values.django.yaml.
+nameOverride: django
+application:
+  containerPort: 8000
+  containerPortName: http-django
+  extraContainerPorts:
+    - name: metrics
+      containerPort: 9090
+  sidecars:
+    - name: webapp-nginx
+      image: nginx
+      ports:
+        - name: http
+          containerPort: 8080
+httpRoute:
+  enabled: true
+networkPolicy:
+  enabled: true

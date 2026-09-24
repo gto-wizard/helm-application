@@ -26,6 +26,14 @@ helm registry login ghcr.io/gto-wizard/helm-application/charts
 helm pull application ghcr.io/gto-wizard/helm-application/charts/application --version 1
 ```
 
+### NetworkPolicy example (opt-in):
+``` yaml
+networkPolicy:
+  enabled: true          # Envoy (if httpRoute.enabled), Alloy and the same namespace are admitted
+  allowFrom:
+    - namespace: rakeback-wizard   # on the Service target port
+```
+
 ## Parameters
 
 ### Image parameters
@@ -202,6 +210,22 @@ helm pull application ghcr.io/gto-wizard/helm-application/charts/application --v
 | `serviceMonitor.scheme`        | HTTP scheme to use for scraping.                      | `""`       |
 | `serviceMonitor.tlsConfig`     | TLS configuration to use when scraping the endpoint   | `{}`       |
 | `serviceMonitor.scrapeTimeout` | Timeout after which the scrape is ended               | `""`       |
+
+### Network Policy parameters
+
+| Name                              | Description                                                                                                             | Value                  |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `networkPolicy.enabled`           | Render a NetworkPolicy that admits only the sources below                                                               | `false`                |
+| `networkPolicy.allowAll`          | Break-glass: keep the policy but admit all ingress                                                                      | `false`                |
+| `networkPolicy.sameNamespace`     | Admit all pods of the release namespace                                                                                 | `true`                 |
+| `networkPolicy.gateway.enabled`   | Admit Envoy on the Service target port (null = httpRoute.enabled)                                                       | `nil`                  |
+| `networkPolicy.gateway.namespace` | Envoy namespace                                                                                                         | `envoy-gateway-system` |
+| `networkPolicy.gateway.podLabels` | Envoy proxy pod labels (default: envoy, component proxy)                                                                | `{}`                   |
+| `networkPolicy.metrics.enabled`   | Admit Alloy on ports named `metrics` and, with serviceMonitor.enabled, the Service target port                          | `true`                 |
+| `networkPolicy.metrics.namespace` | Alloy namespace                                                                                                         | `alloy`                |
+| `networkPolicy.metrics.podLabels` | Alloy pod labels (default: alloy-general)                                                                               | `{}`                   |
+| `networkPolicy.allowFrom`         | Other callers: `namespace` or `anyNamespace: true`, optional `podLabels` and `ports` (default: the Service target port) | `[]`                   |
+| `networkPolicy.extraIngress`      | Raw NetworkPolicy ingress rules                                                                                         | `[]`                   |
 
 ### RBAC parameters.
 

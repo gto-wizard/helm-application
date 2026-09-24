@@ -1,0 +1,16 @@
+# Ports and labels of k8s-resources applications/gto-brain-mcp/services/values.mcp.yaml.
+nameOverride: mcp
+common:
+  labels:
+    component: mcp
+    partOf: gto-brain-mcp
+application:
+  containerPort: 8090
+  extraContainerPorts:
+    - name: metrics
+      containerPort: 9090
+httpRoute:
+  enabled: true
+networkPolicy:
+  enabled: true
+  sameNamespace: false

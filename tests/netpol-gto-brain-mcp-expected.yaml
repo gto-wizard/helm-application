@@ -1,0 +1,31 @@
+# k8s-resources #15385 gto-brain-mcp-ingress, as the chart renders it. Difference: the Alloy peer
+# also requires the alloy-general pod label (#15385 admits the whole alloy namespace).
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: "mcp"
+      app.kubernetes.io/instance: mcp
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: envoy-gateway-system
+        podSelector:
+          matchLabels:
+            app.kubernetes.io/component: proxy
+            app.kubernetes.io/name: envoy
+      ports:
+      - port: 8090
+        protocol: TCP
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: alloy
+        podSelector:
+          matchLabels:
+            app.kubernetes.io/name: alloy-general
+      ports:
+      - port: 9090
+        protocol: TCP

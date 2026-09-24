@@ -99,3 +99,58 @@ Usage:
 {{- toYaml . | nindent 14 }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Numbers of the pod ports with a given name (main container, extraContainerPorts, sidecars).
+NetworkPolicy gets numbers because the AWS policy controller has dropped named-port rules.
+Usage:
+{{ include "application.networkPolicy.portsNamed" (dict "name" "metrics" "root" $) | fromJsonArray }}
+*/}}
+{{- define "application.networkPolicy.portsNamed" -}}
+{{- $app := .root.Values.application }}
+{{- $ports := list }}
+{{- if $app.containerPortEnabled }}
+{{- $ports = append $ports (dict "name" $app.containerPortName "containerPort" $app.containerPort) }}
+{{- end }}
+{{- with $app.extraContainerPorts }}
+{{- $ports = concat $ports (include "application.render" (dict "value" . "context" $.root) | fromYamlArray) }}
+{{- end }}
+{{- with $app.sidecars }}
+{{- range include "application.render" (dict "value" . "context" $.root) | fromYamlArray }}
+{{- $ports = concat $ports (.ports | default list) }}
+{{- end }}
+{{- end }}
+{{- $found := list }}
+{{- range $ports }}
+{{- if eq (toString .name) $.name }}{{ $found = append $found (int .containerPort) }}{{ end }}
+{{- end }}
+{{- toJson $found }}
+{{- end }}
+
+{{/*
+One NetworkPolicy ingress rule: a peer (namespace or anyNamespace, optional podLabels) on TCP ports.
+Usage:
+{{ include "application.networkPolicy.rule" (dict "namespace" "alloy" "podLabels" $labels "ports" $ports) }}
+*/}}
+{{- define "application.networkPolicy.rule" -}}
+{{- if and .anyNamespace (not .podLabels) }}
+{{- fail "networkPolicy.allowFrom: anyNamespace needs podLabels, or it admits every pod in the cluster" }}
+{{- end -}}
+- from:
+  {{- if .anyNamespace }}
+  - namespaceSelector: {}
+  {{- else }}
+  - namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: {{ required "networkPolicy.allowFrom: set namespace or anyNamespace" .namespace }}
+  {{- end }}
+    {{- with .podLabels }}
+    podSelector:
+      matchLabels: {{- toYaml . | nindent 8 }}
+    {{- end }}
+  ports:
+  {{- range .ports }}
+  - port: {{ int . }}
+    protocol: TCP
+  {{- end }}
+{{- end }}

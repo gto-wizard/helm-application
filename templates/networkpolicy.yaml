@@ -1,0 +1,60 @@
+{{- if and .Values.networkPolicy.enabled .Values.application.enabled -}}
+{{- $np := .Values.networkPolicy }}
+{{- /* The pod port behind the Service: Envoy and the ServiceMonitor connect to it, not to service.port. */}}
+{{- $targetPort := 0 }}
+{{- if .Values.service.enabled }}
+{{- $name := toString .Values.service.targetPortName }}
+{{- if regexMatch "^[0-9]+$" $name }}
+{{- $targetPort = int $name }}
+{{- else }}
+{{- $targetPort = include "application.networkPolicy.portsNamed" (dict "name" $name "root" $) | fromJsonArray | first | default 0 | int }}
+{{- end }}
+{{- end }}
+{{- $gateway := $np.gateway.enabled }}
+{{- if kindIs "invalid" $gateway }}{{ $gateway = .Values.httpRoute.enabled }}{{ end }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "application.name" . }}
+  labels:
+    {{- include "application.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "application.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+  ingress:
+  {{- if $np.allowAll }}
+    - {}
+  {{- else }}
+    {{- if $np.sameNamespace }}
+    - from:
+      - podSelector: {}
+    {{- end }}
+    {{- if $gateway }}
+    {{- if not $targetPort }}
+    {{- fail (printf "networkPolicy: service.targetPortName %q matches no container, extra or sidecar port; fix it or set networkPolicy.gateway.enabled=false" (toString .Values.service.targetPortName)) }}
+    {{- end }}
+    {{- include "application.networkPolicy.rule" (dict "namespace" $np.gateway.namespace "podLabels" $np.gateway.podLabels "ports" (list $targetPort)) | nindent 4 }}
+    {{- end }}
+    {{- if $np.metrics.enabled }}
+    {{- $ports := include "application.networkPolicy.portsNamed" (dict "name" "metrics" "root" $) | fromJsonArray }}
+    {{- if and .Values.serviceMonitor.enabled $targetPort }}{{ $ports = append $ports $targetPort }}{{ end }}
+    {{- if $ports }}
+    {{- include "application.networkPolicy.rule" (dict "namespace" $np.metrics.namespace "podLabels" $np.metrics.podLabels "ports" (uniq $ports)) | nindent 4 }}
+    {{- end }}
+    {{- end }}
+    {{- range $np.allowFrom }}
+    {{- $ports := .ports }}
+    {{- if not $ports }}
+    {{- if not $targetPort }}{{ fail "networkPolicy.allowFrom: set ports; the Service target port does not resolve" }}{{ end }}
+    {{- $ports = list $targetPort }}
+    {{- end }}
+    {{- include "application.networkPolicy.rule" (dict "namespace" .namespace "anyNamespace" .anyNamespace "podLabels" .podLabels "ports" $ports) | nindent 4 }}
+    {{- end }}
+    {{- with $np.extraIngress }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+{{- end }}
