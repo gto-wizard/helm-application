@@ -1,0 +1,25 @@
+# Patterns to ignore when building Helm packages.
+# Helm only ignores dotfiles under templates/ by default, so .git at the chart
+# root is packaged unless it is listed here. A CI checkout writes the Actions
+# token into .git/config, which would then ship inside the published chart.
+.git/
+.gitignore
+.github/
+.claude/
+
+# Repo tooling, not needed by chart consumers.
+# README.md stays in the package so `helm show readme` keeps working.
+tests/
+CLAUDE.md
+
+# Build output - never package a previously built chart into a new one.
+*.tgz
+
+# Local editor and OS noise.
+.vscode/
+.idea/
+*.swp
+*.bak
+*.tmp
+*.orig
+.DS_Store
