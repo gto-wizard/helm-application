@@ -1,0 +1,105 @@
+{{- /*
+Opt-in, Ingress-only NetworkPolicy for the application pods (OPS-1470).
+Selects application.selectorLabels: Deployment/StatefulSet pods and job pods. CronJob pods
+carry no labels, so they are not selected. Egress is not restricted.
+All ports are rendered as numbers (see application.networkPolicy.resolvePort).
+*/ -}}
+{{- $np := .Values.networkPolicy | default dict }}
+{{- if and $np.enabled .Values.application.enabled }}
+{{- $gwCfg := $np.gateway | default dict }}
+{{- $mCfg := $np.metrics | default dict }}
+
+{{- /* Gateway rule: gateway.enabled wins; null follows httpRoute.enabled. */}}
+{{- $gw := false }}
+{{- if kindIs "invalid" $gwCfg.enabled }}
+{{- if and .Values.httpRoute .Values.httpRoute.enabled }}{{ $gw = true }}{{ end }}
+{{- else if $gwCfg.enabled }}{{ $gw = true }}{{ end }}
+
+{{- /* The pod port behind the Service (the port Envoy and the ServiceMonitor connect to). */}}
+{{- $svcPort := "" }}
+{{- if .Values.service.enabled }}
+{{- $svcPort = include "application.networkPolicy.resolvePort" (dict "name" .Values.service.targetPortName "root" $) }}
+{{- end }}
+
+{{- $rules := list }}
+{{- if $np.allowAll }}
+{{- $rules = list (dict) }}
+{{- else }}
+
+{{- if $np.sameNamespace }}
+{{- $rules = append $rules (dict "from" (list (dict "podSelector" (dict)))) }}
+{{- end }}
+
+{{- if $gw }}
+{{- $ports := include "application.networkPolicy.numericPorts" (dict "ports" $gwCfg.extraPorts "what" "networkPolicy.gateway.extraPorts") | fromJsonArray }}
+{{- if $svcPort }}{{ $ports = prepend $ports (int $svcPort) }}{{ end }}
+{{- if not $ports }}
+{{- fail (printf "networkPolicy: service.targetPortName %q matches no container, extraContainerPorts or sidecar port, so the gateway rule has no port. Fix the port name, set networkPolicy.gateway.extraPorts, or set networkPolicy.gateway.enabled=false" (toString .Values.service.targetPortName)) }}
+{{- end }}
+{{- $peer := dict "namespaceSelector" (dict "matchLabels" (dict "kubernetes.io/metadata.name" $gwCfg.namespace)) }}
+{{- with $gwCfg.podLabels }}{{ $_ := set $peer "podSelector" (dict "matchLabels" .) }}{{ end }}
+{{- $portList := include "application.networkPolicy.portList" $ports | fromJsonArray }}
+{{- $rules = append $rules (dict "from" (list $peer) "ports" $portList) }}
+{{- end }}
+
+{{- if $mCfg.enabled }}
+{{- $ports := list }}
+{{- range (include "application.networkPolicy.containerPorts" . | fromJsonArray) }}
+{{- if eq .name "metrics" }}{{ $ports = append $ports (int .port) }}{{ end }}
+{{- end }}
+{{- if and .Values.serviceMonitor.enabled $svcPort }}{{ $ports = append $ports (int $svcPort) }}{{ end }}
+{{- $ports = concat $ports (include "application.networkPolicy.numericPorts" (dict "ports" $mCfg.extraPorts "what" "networkPolicy.metrics.extraPorts") | fromJsonArray) }}
+{{- if $ports }}
+{{- $peer := dict "namespaceSelector" (dict "matchLabels" (dict "kubernetes.io/metadata.name" $mCfg.namespace)) }}
+{{- with $mCfg.podLabels }}{{ $_ := set $peer "podSelector" (dict "matchLabels" .) }}{{ end }}
+{{- $portList := include "application.networkPolicy.portList" $ports | fromJsonArray }}
+{{- $rules = append $rules (dict "from" (list $peer) "ports" $portList) }}
+{{- end }}
+{{- end }}
+
+{{- range $i, $e := ($np.allowFrom | default list) }}
+{{- $peer := dict }}
+{{- if and $e.namespace (not $e.anyNamespace) }}
+{{- $_ := set $peer "namespaceSelector" (dict "matchLabels" (dict "kubernetes.io/metadata.name" $e.namespace)) }}
+{{- else if and $e.anyNamespace (not $e.namespace) }}
+{{- if not $e.podLabels }}
+{{- fail (printf "networkPolicy.allowFrom[%d]: anyNamespace requires podLabels (without them it admits every pod in the cluster)" $i) }}
+{{- end }}
+{{- $_ := set $peer "namespaceSelector" (dict) }}
+{{- else }}
+{{- fail (printf "networkPolicy.allowFrom[%d]: set exactly one of namespace or anyNamespace" $i) }}
+{{- end }}
+{{- with $e.podLabels }}{{ $_ := set $peer "podSelector" (dict "matchLabels" .) }}{{ end }}
+{{- $ports := include "application.networkPolicy.numericPorts" (dict "ports" $e.ports "what" (printf "networkPolicy.allowFrom[%d].ports" $i)) | fromJsonArray }}
+{{- if not $ports }}
+{{- if not $svcPort }}
+{{- fail (printf "networkPolicy.allowFrom[%d]: no ports and the Service target port does not resolve; set ports" $i) }}
+{{- end }}
+{{- $ports = list (int $svcPort) }}
+{{- end }}
+{{- $portList := include "application.networkPolicy.portList" $ports | fromJsonArray }}
+{{- $rules = append $rules (dict "from" (list $peer) "ports" $portList) }}
+{{- end }}
+
+{{- with $np.extraIngress }}
+{{- $rules = concat $rules (include "application.render" (dict "value" . "context" $) | fromYamlArray) }}
+{{- end }}
+{{- end }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "application.name" . }}
+  labels:
+    {{- include "application.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "application.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+  {{- if $rules }}
+  ingress: {{- toYaml $rules | nindent 4 }}
+  {{- else }}
+  ingress: []
+  {{- end }}
+{{- end }}

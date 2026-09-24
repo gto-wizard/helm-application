@@ -1,0 +1,31 @@
+# helm-template render fixture (see tests/README.md).
+# The Service targets the extraContainerPorts entry `api` (5001) by name. No HTTPRoute.
+# Expected: no gateway rule; Alloy on 5001 (ServiceMonitor); allowFrom rules on 5001
+# unless an entry sets its own ports.
+nameOverride: solutions-service
+application:
+  containerPort: 8000
+  containerPortName: http
+  extraContainerPorts:
+    - name: api
+      containerPort: 5001
+      protocol: TCP
+service:
+  enabled: true
+  port: 5001
+  name: api
+  targetPortName: api
+serviceMonitor:
+  enabled: true
+networkPolicy:
+  enabled: true
+  allowFrom:
+    - namespace: webapp
+    - namespace: webapp-custom
+      podLabels:
+        app.kubernetes.io/name: dramatiq-hands
+    - anyNamespace: true
+      podLabels:
+        app.kubernetes.io/part-of: webapp
+    - namespace: ai-engine
+      ports: [4369, "8080"]

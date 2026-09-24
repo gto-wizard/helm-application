@@ -99,3 +99,84 @@ Usage:
 {{- toYaml . | nindent 14 }}
 {{- end }}
 {{- end -}}
+
+{{/*
+All ports declared on the application pod, as a JSON list of {name, port}: the main
+container, then extraContainerPorts, then every sidecar. Search order = this order.
+Usage:
+{{ include "application.networkPolicy.containerPorts" . | fromJsonArray }}
+*/}}
+{{- define "application.networkPolicy.containerPorts" -}}
+{{- $ports := list }}
+{{- if .Values.application.containerPortEnabled }}
+{{- $ports = append $ports (dict "name" (toString .Values.application.containerPortName) "port" (int .Values.application.containerPort)) }}
+{{- end }}
+{{- with .Values.application.extraContainerPorts }}
+{{- range (include "application.render" (dict "value" . "context" $) | fromYamlArray) }}
+{{- $ports = append $ports (dict "name" (toString (.name | default "")) "port" (int .containerPort)) }}
+{{- end }}
+{{- end }}
+{{- with .Values.application.sidecars }}
+{{- range (include "application.render" (dict "value" . "context" $) | fromYamlArray) }}
+{{- range (.ports | default list) }}
+{{- $ports = append $ports (dict "name" (toString (.name | default "")) "port" (int .containerPort)) }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- toJson $ports }}
+{{- end }}
+
+{{/*
+Resolves a Service targetPort (a number, or a port name) to the numeric pod port.
+Returns "" when no container, extra or sidecar port has that name.
+NetworkPolicy gets numbers only: the AWS network policy controller has dropped
+named-port ingress rules (amazon-network-policy-controller-k8s #71, #81).
+Usage:
+{{ include "application.networkPolicy.resolvePort" (dict "name" .Values.service.targetPortName "root" $) }}
+*/}}
+{{- define "application.networkPolicy.resolvePort" -}}
+{{- $name := toString .name }}
+{{- if regexMatch "^[0-9]+$" $name }}
+{{- $name }}
+{{- else }}
+{{- $found := "" }}
+{{- range (include "application.networkPolicy.containerPorts" .root | fromJsonArray) }}
+{{- if and (not $found) (eq .name $name) }}{{ $found = toString (int .port) }}{{ end }}
+{{- end }}
+{{- $found }}
+{{- end }}
+{{- end }}
+
+{{/*
+Validates a list of port numbers and returns it as a JSON list of ints.
+Usage:
+{{ include "application.networkPolicy.numericPorts" (dict "ports" $list "what" "networkPolicy.gateway.extraPorts") | fromJsonArray }}
+*/}}
+{{- define "application.networkPolicy.numericPorts" -}}
+{{- $out := list }}
+{{- range (.ports | default list) }}
+{{- if not (regexMatch "^[0-9]+$" (toString .)) }}
+{{- fail (printf "%s: %q is not a port number (NetworkPolicy ports must be numeric)" $.what (toString .)) }}
+{{- end }}
+{{- $out = append $out (int .) }}
+{{- end }}
+{{- toJson $out }}
+{{- end }}
+
+{{/*
+Turns a list of port numbers into NetworkPolicy ports (TCP), without duplicates.
+Usage:
+{{ include "application.networkPolicy.portList" $ports | fromJsonArray }}
+*/}}
+{{- define "application.networkPolicy.portList" -}}
+{{- $seen := dict }}
+{{- $out := list }}
+{{- range . }}
+{{- $p := int . }}
+{{- if not (hasKey $seen (toString $p)) }}
+{{- $_ := set $seen (toString $p) true }}
+{{- $out = append $out (dict "port" $p "protocol" "TCP") }}
+{{- end }}
+{{- end }}
+{{- toJson $out }}
+{{- end }}

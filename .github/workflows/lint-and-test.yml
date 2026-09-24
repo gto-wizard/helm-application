@@ -5,6 +5,7 @@ on:
     paths:
       - 'values.yaml'
       - 'templates/**'
+      - 'tests/**'
 
 jobs:
   lint-test:
@@ -24,6 +25,11 @@ jobs:
         with:
           python-version: '3.x'
           check-latest: true
+
+      - name: Run render tests
+        run: |
+          pip install pyyaml
+          for t in tests/render-*.sh; do bash "$t"; done
 
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.7.0

@@ -203,6 +203,24 @@ helm pull application ghcr.io/gto-wizard/helm-application/charts/application --v
 | `serviceMonitor.tlsConfig`     | TLS configuration to use when scraping the endpoint   | `{}`       |
 | `serviceMonitor.scrapeTimeout` | Timeout after which the scrape is ended               | `""`       |
 
+### Network Policy parameters
+
+| Name                               | Description                                                                                                                                                   | Value                  |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `networkPolicy.enabled`            | Render the NetworkPolicy. Off by default, so a chart bump changes no traffic                                                                                  | `false`                |
+| `networkPolicy.allowAll`           | Break-glass: keep the object but admit all ingress (`ingress: [{}]`). All other keys are ignored                                                              | `false`                |
+| `networkPolicy.sameNamespace`      | Admit all ports from every pod in the release namespace                                                                                                       | `true`                 |
+| `networkPolicy.gateway.enabled`    | Admit the Envoy proxy pods on the Service target port. `null` follows httpRoute.enabled                                                                       | `nil`                  |
+| `networkPolicy.gateway.namespace`  | Namespace of the Envoy proxy pods                                                                                                                             | `envoy-gateway-system` |
+| `networkPolicy.gateway.podLabels`  | Labels of the Envoy proxy pods (default: app.kubernetes.io/name=envoy, app.kubernetes.io/component=proxy)                                                     | `{}`                   |
+| `networkPolicy.gateway.extraPorts` | More pod port numbers for the gateway (e.g. an HTTPRoute backendRef to a Service extraPort)                                                                   | `[]`                   |
+| `networkPolicy.metrics.enabled`    | Admit the scraper on every container port named `metrics`, plus the Service target port when serviceMonitor.enabled                                           | `true`                 |
+| `networkPolicy.metrics.namespace`  | Namespace of the scraper pods                                                                                                                                 | `alloy`                |
+| `networkPolicy.metrics.podLabels`  | Labels of the scraper pods (default: app.kubernetes.io/name=alloy-general)                                                                                    | `{}`                   |
+| `networkPolicy.metrics.extraPorts` | More pod port numbers to scrape (e.g. an extra ServiceMonitor or PodMonitor port)                                                                             | `[]`                   |
+| `networkPolicy.allowFrom`          | Cross-namespace callers. Each entry: `namespace` OR `anyNamespace: true`, optional `podLabels`, optional `ports` (numbers; default = the Service target port) | `[]`                   |
+| `networkPolicy.extraIngress`       | Raw NetworkPolicyIngressRule entries, appended as-is (evaluated as a template)                                                                                | `[]`                   |
+
 ### RBAC parameters.
 
 | Name           | Description                                | Value   |

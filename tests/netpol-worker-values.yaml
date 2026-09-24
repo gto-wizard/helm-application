@@ -1,0 +1,9 @@
+# helm-template render fixture (see tests/README.md). A worker: no Service, no port, no route.
+# Expected: only the same-namespace rule.
+nameOverride: dramatiq
+application:
+  containerPortEnabled: false
+service:
+  enabled: false
+networkPolicy:
+  enabled: true
