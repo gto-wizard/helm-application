@@ -1,0 +1,32 @@
+# The Service targets the nginx sidecar port (8080). The Django port 8000 must not appear.
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: "django"
+      app.kubernetes.io/instance: django
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+      - podSelector: {}
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: envoy-gateway-system
+        podSelector:
+          matchLabels:
+            app.kubernetes.io/component: proxy
+            app.kubernetes.io/name: envoy
+      ports:
+      - port: 8080
+        protocol: TCP
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: alloy
+        podSelector:
+          matchLabels:
+            app.kubernetes.io/name: alloy-general
+      ports:
+      - port: 9090
+        protocol: TCP

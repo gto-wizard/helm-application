@@ -1,14 +1,9 @@
-# helm-template render fixture (see tests/README.md). Port and label shape of
-# k8s-resources applications/gtowiz-dwh/prod/values.mcp.yaml.
-# Expected: same podSelector and ingress as netpol-golden-dwh-mcp.yaml.
+# Ports of k8s-resources applications/gtowiz-dwh/prod/values.mcp.yaml.
 nameOverride: mcp
 application:
   containerPort: 8001
-  containerPortName: http
 service:
-  enabled: true
   port: 8001
-  targetPortName: http
 httpRoute:
   enabled: true
 networkPolicy:

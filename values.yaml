@@ -815,54 +815,39 @@ serviceMonitor:
   scrapeTimeout: ""
 
 ## @section Network Policy parameters
-## Opt-in, Ingress-only NetworkPolicy for the application pods (selected by the selector labels).
-## When enabled, only the sources below can open connections to the pods. Egress is not restricted.
-## All ports are pod (container) ports rendered as numbers, never the Service port.
-## ArgoCD prune is off for the apps, so `enabled: false` does NOT delete a live policy: use `allowAll`.
+## Ingress-only. Ports are pod ports. ArgoCD prune is off, so roll back with allowAll, not enabled: false.
 networkPolicy:
-  ## @param networkPolicy.enabled Render the NetworkPolicy. Off by default, so a chart bump changes no traffic
+  ## @param networkPolicy.enabled Render a NetworkPolicy that admits only the sources below
   enabled: false
-  ## @param networkPolicy.allowAll Break-glass: keep the object but admit all ingress (`ingress: [{}]`). All other keys are ignored
+  ## @param networkPolicy.allowAll Break-glass: keep the policy but admit all ingress
   allowAll: false
-  ## @param networkPolicy.sameNamespace Admit all ports from every pod in the release namespace
+  ## @param networkPolicy.sameNamespace Admit all pods of the release namespace
   sameNamespace: true
-
   gateway:
-    ## @param networkPolicy.gateway.enabled [nullable] Admit the Envoy proxy pods on the Service target port. `null` follows httpRoute.enabled
+    ## @param networkPolicy.gateway.enabled [nullable] Admit Envoy on the Service target port (null = httpRoute.enabled)
     enabled: null
-    ## @param networkPolicy.gateway.namespace Namespace of the Envoy proxy pods
+    ## @param networkPolicy.gateway.namespace Envoy namespace
     namespace: envoy-gateway-system
-    ## @param networkPolicy.gateway.podLabels [object] Labels of the Envoy proxy pods (default: app.kubernetes.io/name=envoy, app.kubernetes.io/component=proxy)
+    ## @param networkPolicy.gateway.podLabels [object] Envoy proxy pod labels (default: envoy, component proxy)
     podLabels:
       app.kubernetes.io/name: envoy
       app.kubernetes.io/component: proxy
-    ## @param networkPolicy.gateway.extraPorts [array] More pod port numbers for the gateway (e.g. an HTTPRoute backendRef to a Service extraPort)
-    extraPorts: []
-
   metrics:
-    ## @param networkPolicy.metrics.enabled Admit the scraper on every container port named `metrics`, plus the Service target port when serviceMonitor.enabled
+    ## @param networkPolicy.metrics.enabled Admit Alloy on ports named `metrics` and, with serviceMonitor.enabled, the Service target port
     enabled: true
-    ## @param networkPolicy.metrics.namespace Namespace of the scraper pods
+    ## @param networkPolicy.metrics.namespace Alloy namespace
     namespace: alloy
-    ## @param networkPolicy.metrics.podLabels [object] Labels of the scraper pods (default: app.kubernetes.io/name=alloy-general)
+    ## @param networkPolicy.metrics.podLabels [object] Alloy pod labels (default: alloy-general)
     podLabels:
       app.kubernetes.io/name: alloy-general
-    ## @param networkPolicy.metrics.extraPorts [array] More pod port numbers to scrape (e.g. an extra ServiceMonitor or PodMonitor port)
-    extraPorts: []
-
-  ## @param networkPolicy.allowFrom [array] Cross-namespace callers. Each entry: `namespace` OR `anyNamespace: true`, optional `podLabels`, optional `ports` (numbers; default = the Service target port)
+  ## @param networkPolicy.allowFrom [array] Other callers: `namespace` or `anyNamespace: true`, optional `podLabels` and `ports` (default: the Service target port)
   allowFrom: []
   # allowFrom:
   #   - namespace: rakeback-wizard
-  #   - namespace: webapp
-  #     podLabels:
-  #       app.kubernetes.io/name: dramatiq-hands
-  #   - anyNamespace: true          # requires podLabels
+  #   - anyNamespace: true
   #     podLabels:
   #       app.kubernetes.io/part-of: webapp
-  #     ports: [5001]
-
-  ## @param networkPolicy.extraIngress [array] Raw NetworkPolicyIngressRule entries, appended as-is (evaluated as a template)
+  ## @param networkPolicy.extraIngress [array] Raw NetworkPolicy ingress rules
   extraIngress: []
 
 ## @section RBAC parameters.

@@ -26,6 +26,14 @@ helm registry login ghcr.io/gto-wizard/helm-application/charts
 helm pull application ghcr.io/gto-wizard/helm-application/charts/application --version 1
 ```
 
+### NetworkPolicy example (opt-in):
+``` yaml
+networkPolicy:
+  enabled: true          # Envoy (if httpRoute.enabled), Alloy and the same namespace are admitted
+  allowFrom:
+    - namespace: rakeback-wizard   # on the Service target port
+```
+
 ## Parameters
 
 ### Image parameters
@@ -205,21 +213,19 @@ helm pull application ghcr.io/gto-wizard/helm-application/charts/application --v
 
 ### Network Policy parameters
 
-| Name                               | Description                                                                                                                                                   | Value                  |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| `networkPolicy.enabled`            | Render the NetworkPolicy. Off by default, so a chart bump changes no traffic                                                                                  | `false`                |
-| `networkPolicy.allowAll`           | Break-glass: keep the object but admit all ingress (`ingress: [{}]`). All other keys are ignored                                                              | `false`                |
-| `networkPolicy.sameNamespace`      | Admit all ports from every pod in the release namespace                                                                                                       | `true`                 |
-| `networkPolicy.gateway.enabled`    | Admit the Envoy proxy pods on the Service target port. `null` follows httpRoute.enabled                                                                       | `nil`                  |
-| `networkPolicy.gateway.namespace`  | Namespace of the Envoy proxy pods                                                                                                                             | `envoy-gateway-system` |
-| `networkPolicy.gateway.podLabels`  | Labels of the Envoy proxy pods (default: app.kubernetes.io/name=envoy, app.kubernetes.io/component=proxy)                                                     | `{}`                   |
-| `networkPolicy.gateway.extraPorts` | More pod port numbers for the gateway (e.g. an HTTPRoute backendRef to a Service extraPort)                                                                   | `[]`                   |
-| `networkPolicy.metrics.enabled`    | Admit the scraper on every container port named `metrics`, plus the Service target port when serviceMonitor.enabled                                           | `true`                 |
-| `networkPolicy.metrics.namespace`  | Namespace of the scraper pods                                                                                                                                 | `alloy`                |
-| `networkPolicy.metrics.podLabels`  | Labels of the scraper pods (default: app.kubernetes.io/name=alloy-general)                                                                                    | `{}`                   |
-| `networkPolicy.metrics.extraPorts` | More pod port numbers to scrape (e.g. an extra ServiceMonitor or PodMonitor port)                                                                             | `[]`                   |
-| `networkPolicy.allowFrom`          | Cross-namespace callers. Each entry: `namespace` OR `anyNamespace: true`, optional `podLabels`, optional `ports` (numbers; default = the Service target port) | `[]`                   |
-| `networkPolicy.extraIngress`       | Raw NetworkPolicyIngressRule entries, appended as-is (evaluated as a template)                                                                                | `[]`                   |
+| Name                              | Description                                                                                                             | Value                  |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `networkPolicy.enabled`           | Render a NetworkPolicy that admits only the sources below                                                               | `false`                |
+| `networkPolicy.allowAll`          | Break-glass: keep the policy but admit all ingress                                                                      | `false`                |
+| `networkPolicy.sameNamespace`     | Admit all pods of the release namespace                                                                                 | `true`                 |
+| `networkPolicy.gateway.enabled`   | Admit Envoy on the Service target port (null = httpRoute.enabled)                                                       | `nil`                  |
+| `networkPolicy.gateway.namespace` | Envoy namespace                                                                                                         | `envoy-gateway-system` |
+| `networkPolicy.gateway.podLabels` | Envoy proxy pod labels (default: envoy, component proxy)                                                                | `{}`                   |
+| `networkPolicy.metrics.enabled`   | Admit Alloy on ports named `metrics` and, with serviceMonitor.enabled, the Service target port                          | `true`                 |
+| `networkPolicy.metrics.namespace` | Alloy namespace                                                                                                         | `alloy`                |
+| `networkPolicy.metrics.podLabels` | Alloy pod labels (default: alloy-general)                                                                               | `{}`                   |
+| `networkPolicy.allowFrom`         | Other callers: `namespace` or `anyNamespace: true`, optional `podLabels` and `ports` (default: the Service target port) | `[]`                   |
+| `networkPolicy.extraIngress`      | Raw NetworkPolicy ingress rules                                                                                         | `[]`                   |
 
 ### RBAC parameters.
 

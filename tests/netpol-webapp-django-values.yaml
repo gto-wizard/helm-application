@@ -1,7 +1,4 @@
-# helm-template render fixture (see tests/README.md). Port shape of
-# k8s-resources applications/webapp/prod/values.django.yaml: the Service targets the
-# nginx SIDECAR port `http` (8080), not the main container port `http-django` (8000).
-# Expected: gateway on 8080, Alloy on 9090, and 8000 in no rule.
+# Ports of k8s-resources applications/webapp/prod/values.django.yaml.
 nameOverride: django
 application:
   containerPort: 8000
@@ -9,24 +6,12 @@ application:
   extraContainerPorts:
     - name: metrics
       containerPort: 9090
-      protocol: TCP
   sidecars:
     - name: webapp-nginx
       image: nginx
       ports:
         - name: http
           containerPort: 8080
-        - name: healthz
-          containerPort: 8081
-service:
-  enabled: true
-  port: 80
-  targetPortName: http
-  extraPorts:
-    - name: metrics
-      port: 9090
-      targetPort: metrics
-      protocol: TCP
 httpRoute:
   enabled: true
 networkPolicy:

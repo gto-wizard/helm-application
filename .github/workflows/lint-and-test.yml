@@ -27,9 +27,7 @@ jobs:
           check-latest: true
 
       - name: Run render tests
-        run: |
-          pip install pyyaml
-          for t in tests/render-*.sh; do bash "$t"; done
+        run: for t in tests/render-*.sh; do bash "$t"; done
 
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.7.0

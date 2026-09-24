@@ -1,6 +1,4 @@
-# helm-template render fixture (see tests/README.md). Port and label shape of
-# k8s-resources applications/gto-brain-mcp/services/values.mcp.yaml.
-# Expected: same ingress as netpol-golden-gto-brain-mcp.yaml.
+# Ports and labels of k8s-resources applications/gto-brain-mcp/services/values.mcp.yaml.
 nameOverride: mcp
 common:
   labels:
@@ -8,20 +6,11 @@ common:
     partOf: gto-brain-mcp
 application:
   containerPort: 8090
-  containerPortName: http
   extraContainerPorts:
-    - containerPort: 9090
-      name: metrics
-      protocol: TCP
-service:
-  enabled: true
-  port: 80
-  name: http
-  targetPortName: http
+    - name: metrics
+      containerPort: 9090
 httpRoute:
   enabled: true
-serviceMonitor:
-  enabled: false
 networkPolicy:
   enabled: true
   sameNamespace: false

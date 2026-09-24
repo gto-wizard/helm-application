@@ -13,7 +13,7 @@ live under `tests/` (not `ci/`) so `ct install` never picks them up.
 ```bash
 bash tests/render-job-timeout.sh
 bash tests/render-keda-replicas.sh
-bash tests/render-networkpolicy.sh   # needs python3 + PyYAML
+bash tests/render-networkpolicy.sh
 ```
 
 CI (`lint-and-test.yml`) runs every `tests/render-*.sh`.
@@ -46,18 +46,8 @@ The zero case exists to permanently pin the behavior: a `{{- with }}` guard sile
 lets the Deployment default to 1 on a cold namespace — an unschedulable pod / first-sync Degraded
 flap in ephemeral preview envs, the exact footgun this opt-in exists to remove.
 
-`render-networkpolicy.sh` asserts the opt-in `networkPolicy` template (OPS-1470). The cases are in
-`render-networkpolicy.py`, because they compare YAML structure:
-
-| Fixture | Case | Expected |
-|---------|------|----------|
-| chart defaults + every `netpol-*` fixture with `enabled=false` | default off | no NetworkPolicy (a chart bump changes no traffic) |
-| `netpol-gto-brain-mcp-values.yaml` | shape of gto-brain-mcp (services) | ingress equals `netpol-golden-gto-brain-mcp.yaml` (k8s-resources #15385); the Alloy peer is narrowed to `alloy-general` |
-| `netpol-dwh-mcp-values.yaml` | shape of gtowiz-dwh prod `mcp` | spec equals `netpol-golden-dwh-mcp.yaml` (k8s-resources #15385) |
-| `netpol-webapp-django-values.yaml` | Service targets a sidecar port | gateway on 8080 (nginx sidecar), Alloy on 9090, 8000 in no rule |
-| `netpol-allowfrom-values.yaml` | `targetPortName` names an extra port | `allowFrom` rules on 5001; explicit `ports` kept; Alloy on the ServiceMonitor port |
-| `netpol-worker-values.yaml` | no Service, no port | same-namespace rule only; `ingress: []` with `sameNamespace=false` |
-| `netpol-allowall-values.yaml` | break-glass | `ingress: [{}]`, even with an unresolvable port |
-| `netpol-unresolvable-values.yaml` | `targetPortName` matches no port, gateway on | the render fails |
-
-The golden files hold the #15385 specs. If one of those policies changes, update its golden file.
+`render-networkpolicy.sh` asserts the opt-in `networkPolicy` template (OPS-1470). For each
+`netpol-<app>-values.yaml` fixture, the rendered spec must equal `netpol-<app>-expected.yaml`.
+The gto-brain-mcp and dwh-mcp expected files are the two policies of k8s-resources #15385.
+The webapp-django case proves that a sidecar target port (8080) is resolved to its number.
+It also checks: off by default, `allowAll`, and a render failure for an unknown target port name.
