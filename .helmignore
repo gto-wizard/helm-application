@@ -7,6 +7,25 @@
 .github/
 .claude/
 
+# Secret and local credential files. A chart must never carry one.
+.env
+.env.*
+*.env
+*.tfvars
+*.tfvars.json
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.kubeconfig
+kubeconfig
+credentials
+credentials.*
+*credentials*.json
+*.secret
+*.secrets
+
 # Repo tooling, not needed by chart consumers.
 # README.md stays in the package so `helm show readme` keeps working.
 tests/
